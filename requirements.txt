@@ -1,0 +1,9 @@
+brax==0.14.1
+flax==0.10.7
+gym==0.26.2
+jax==0.6.0
+omegaconf==2.3.0
+optax==0.2.7
+pydantic==2.12.5
+tqdm==4.67.3
+wandb==0.25.0
