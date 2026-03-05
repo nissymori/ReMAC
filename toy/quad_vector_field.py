@@ -6,30 +6,19 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib as mpl
-import argparse
-import os
-
-import jax
-import jax.numpy as jnp
-import matplotlib.pyplot as plt
-import numpy as np
-import matplotlib as mpl
+from matplotlib.colors import LogNorm
 
 mpl.rcParams.update({
     "text.usetex": False,
     "font.family": "sans-serif",
-    "mathtext.fontset": "dejavusans",
+    "mathtext.fontset": "cm",
 })
-
-from matplotlib.colors import LogNorm
-
 
 try:
     from toy.remax import compute_batch_remax
 except ModuleNotFoundError:
     from remax import compute_batch_remax
-# 追加
-from matplotlib.colors import LogNorm
+
 
 def quad(x: jnp.ndarray) -> jnp.ndarray:
     return -(x**2)  # + 0.01 * jnp.sin(x)
@@ -40,10 +29,23 @@ def sample_actions(key: jax.Array, mu: jnp.ndarray, sigma: jnp.ndarray, batch_si
     return mu + sigma * eps
 
 
-def reparam_objective(mu: jnp.ndarray, sigma: jnp.ndarray, key: jax.Array, batch_size: int, m: int) -> jnp.ndarray:
+def reparam_objective(
+    mu: jnp.ndarray,
+    sigma: jnp.ndarray,
+    key: jax.Array,
+    batch_size: int,
+    m: int,
+    alpha: float
+) -> jnp.ndarray:
     actions = sample_actions(key, mu, sigma, batch_size)
     returns = quad(actions)
-    return compute_batch_remax(returns, m)
+    remax_obj = compute_batch_remax(returns, m)
+
+    # 1次元ガウス分布のエントロピー: H = 0.5 * log(2 * pi * e * sigma^2)
+    # alphaを掛けて目的関数に足し合わせる（探索ボーナス）
+    entropy = 0.5 * jnp.log(2 * jnp.pi * jnp.e * (sigma ** 2))
+
+    return remax_obj + alpha * entropy
 
 
 def estimate_gradients(
@@ -51,6 +53,7 @@ def estimate_gradients(
     sigma_grid: jnp.ndarray,
     batch_size: int,
     m: int,
+    alpha: float,
     repeats: int,
     key: jax.Array,
 ) -> tuple[jnp.ndarray, jnp.ndarray]:
@@ -62,7 +65,8 @@ def estimate_gradients(
     keys = jax.random.split(key, num_points * repeats).reshape(num_points, repeats, 2)
 
     def grad_for_point(mu: jnp.ndarray, sigma: jnp.ndarray, keys_for_point: jnp.ndarray) -> jnp.ndarray:
-        grads = jax.vmap(lambda k: grad_fn(mu, sigma, k, batch_size, m))(keys_for_point)
+        # alpha を引数として渡す
+        grads = jax.vmap(lambda k: grad_fn(mu, sigma, k, batch_size, m, alpha))(keys_for_point)
         dmu, dsigma = grads
         return jnp.stack([jnp.mean(dmu, axis=0), jnp.mean(dsigma, axis=0)], axis=0)
 
@@ -124,10 +128,10 @@ def plot_gradients(
     )
 
     ax.margins(x=0.04, y=0.06)  # 端でクリップされて短く見えるのを軽減
-    ax.set_xlabel(r"$\mathsf{\mu}$")
-    ax.set_ylabel(r"$\mathsf{\sigma}$")
+    ax.set_xlabel(r"$\mu$")
+    ax.set_ylabel(r"$\sigma$")
     ax.set_yticks([0.5, 1.0, 1.5, 2.0])
-    ax.set_title(r"$\mathsf{{M}}={}$".format(m))
+    ax.set_title(f"M={m}")
     return q
 
 def main() -> None:
@@ -144,6 +148,9 @@ def main() -> None:
     parser.add_argument("--mu-steps", type=int, default=13)
     parser.add_argument("--sigma-steps", type=int, default=13)
 
+    # エントロピーボーナス用の引数を追加
+    parser.add_argument("--alpha", type=float, default=0.0, help="Entropy bonus coefficient (default: 0.0)")
+
     parser.add_argument(
         "--normalize",
         action="store_true",
@@ -157,38 +164,13 @@ def main() -> None:
 
     # Paper-friendly colormap choices (sequential)
     cmap_choices = [
-        "cividis",   # very print / colorblind friendly
-        "cividis_r",
-        "viridis",
-        "viridis_r",
-        "plasma",
-        "plasma_r",
-        "magma",
-        "magma_r",
-        "inferno",
-        "inferno_r",
-        "Greys",     # grayscale printing
-        "Blues",
-        "turbo",
-        "BuPu",
-        "BuPu_r",
-        "BuGn",
-        "BuGn_r",
-        "BuRd",
-        "BuRd_r",
-        "PuBu",
-        "PuBu_r",
-        "PuBuGn",
-        "PuBuGn_r",
-        "PuRd",
-        "PuRd_r",
-        "RdPu",
-        "RdPu_r",
-        "RdBu",
-        "RdYlBu",
-        "twilight",
+        "cividis", "cividis_r", "viridis", "viridis_r", "plasma", "plasma_r",
+        "magma", "magma_r", "inferno", "inferno_r", "Greys", "Blues", "turbo",
+        "BuPu", "BuPu_r", "BuGn", "BuGn_r", "BuRd", "BuRd_r", "PuBu", "PuBu_r",
+        "PuBuGn", "PuBuGn_r", "PuRd", "PuRd_r", "RdPu", "RdPu_r", "RdBu",
+        "RdYlBu", "twilight",
     ]
-    parser.add_argument("--cmap", type=str, default="plasma", choices=cmap_choices)
+    parser.add_argument("--cmap", type=str, default="Blues", choices=cmap_choices)
 
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
@@ -203,7 +185,7 @@ def main() -> None:
         {
             "font.size": 11,
             "axes.titlesize": 23,
-            "axes.labelsize": 20,
+            "axes.labelsize": 22,
             "xtick.labelsize": 14,
             "ytick.labelsize": 14,
         }
@@ -219,6 +201,7 @@ def main() -> None:
         sigma_grid,
         batch_size=args.batch_size,
         m=args.m,
+        alpha=args.alpha,  # alpha を渡す
         repeats=args.repeats,
         key=key,
     )
@@ -243,8 +226,10 @@ def main() -> None:
 
     fig.tight_layout()
 
+    # 出力ファイル名に alpha を含めるように変更
     out = (
         f"fig/quad_gradients_m={args.m}"
+        f"_alpha={args.alpha}"
         f"_norm={args.normalize}"
         f"_cmap={args.cmap}"
         f"_cb={args.colorbar}.pdf"

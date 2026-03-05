@@ -14,7 +14,7 @@ import matplotlib as mpl
 mpl.rcParams.update({
     "text.usetex": False,
     "font.family": "sans-serif",
-    "mathtext.fontset": "dejavusans",
+    "mathtext.fontset": "cm",
 })
 
 try:
@@ -441,12 +441,12 @@ def plot_distance_only(results_adam, actor_epsilons, *, m: int, savepath: str, s
 
     ax.set_yscale("log")
     ax.set_xlabel("iteration", fontsize=20)
-    ax.set_ylabel(r"$\|\mathsf{\theta_t-\theta^\star}\|_2$", fontsize=20)
+    ax.set_ylabel(r"$\|\theta_t-\theta^\star\|_2$", fontsize=20)
     ax.set_xticks([0, 200, 400, 600, 800, 1000])
     ax.set_yticks([1e-4, 1e-3, 1e-2, 1e-1, 1e0])
     ax.tick_params(axis="both", which="major", labelsize=16)
 
-    ax.set_title(r"$\mathsf{{M}}={}$".format(m), fontsize=22)
+    ax.set_title(f"M={m}", fontsize=22)
     ax.grid(True, which="both", alpha=0.25)
     if plot_legend:
         ax.legend(fontsize=14, ncol=1, frameon=False)
@@ -526,9 +526,9 @@ def optimization_path_only(
 
     ax.plot(0.0, 0.0, marker="x", markersize=9, color="r", label="Optimum")
 
-    ax.set_xlabel(r"$\mathsf{\mu}$", fontsize=18)
-    ax.set_ylabel(r"$\mathsf{\sigma}$", fontsize=18)
-    ax.set_title(r"$\mathsf{{M}}={}$".format(m), fontsize=22)
+    ax.set_xlabel(r"$\mu$", fontsize=18)
+    ax.set_ylabel(r"$\sigma$", fontsize=18)
+    ax.set_title(f"M={m}", fontsize=22)
 
     ax.set_xlim(x_min, x_max)
     ax.set_ylim(y_min, y_max)
