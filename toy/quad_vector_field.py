@@ -85,6 +85,7 @@ def plot_gradients(
     normalize: bool,
     cmap: str,
     m: int,
+    with_entropy: bool,
 ):
     mu_np = np.asarray(mu_grid)
     sigma_np = np.asarray(sigma_grid)
@@ -98,8 +99,8 @@ def plot_gradients(
         u = np.divide(dmu_np, magnitude, out=np.zeros_like(dmu_np), where=(magnitude > 0))
         v = np.divide(dsigma_np, magnitude, out=np.zeros_like(dsigma_np), where=(magnitude > 0))
 
-        dmu_plot = u 
-        dsigma_plot = v 
+        dmu_plot = u
+        dsigma_plot = v
     else:
         dmu_plot = dmu_np
         dsigma_plot = dsigma_np
@@ -132,6 +133,8 @@ def plot_gradients(
     ax.set_ylabel(r"$\sigma$")
     ax.set_yticks([0.5, 1.0, 1.5, 2.0])
     ax.set_title(f"M={m}")
+    if with_entropy:
+        ax.set_title(f"M={m} (Ent.)")
     return q
 
 def main() -> None:
@@ -185,7 +188,7 @@ def main() -> None:
         {
             "font.size": 11,
             "axes.titlesize": 23,
-            "axes.labelsize": 22,
+            "axes.labelsize": 33,
             "xtick.labelsize": 14,
             "ytick.labelsize": 14,
         }
@@ -218,6 +221,7 @@ def main() -> None:
         normalize=args.normalize,
         cmap=args.cmap,
         m=args.m,
+        with_entropy=args.alpha > 0.0,
     )
 
     if args.colorbar:
