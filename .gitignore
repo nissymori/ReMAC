@@ -177,3 +177,6 @@ cython_debug/
 
 videos/
 fig/
+cache/
+docs/
+plot.py

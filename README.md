@@ -49,5 +49,6 @@ At `brax/`
 ```bash
 ./sh/remac.sh  # for ReMAC
 ./sh/sac.sh  # for SAC
+./sh/ppo.sh  # for PPO
 ```
 
