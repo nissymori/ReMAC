@@ -23,6 +23,8 @@ def _resolve_local_algo(algo_str):
     local_algo_map = {
         "sac": ("sac", "SAC"),
         "remax_ac": ("remax_ac", "ReMaxAC"),
+        "td3": ("td3", "TD3"),
+        "ppo": ("ppo", "PPO"),
     }
     if algo_str not in local_algo_map:
         return None
