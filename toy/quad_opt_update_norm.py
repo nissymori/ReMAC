@@ -11,10 +11,15 @@ import jax
 import jax.numpy as jnp
 import matplotlib as mpl
 
-mpl.rcParams.update({
-    "text.usetex": False,
-    "font.family": "sans-serif",
+plt.rcParams.update({
+    "font.family": "serif",
+    "font.serif": ["cmr10", "Computer Modern Roman", "DejaVu Serif"],
     "mathtext.fontset": "cm",
+    "mathtext.rm": "serif",
+    "axes.formatter.use_mathtext": True,
+    "axes.unicode_minus": False,
+    "pdf.fonttype": 42,
+    "ps.fonttype": 42,
 })
 
 try:
@@ -204,6 +209,12 @@ def _parse_float_list(csv: str):
 
 def _eps_tag(eps: float) -> str:
     return f"{eps:.0e}".replace("+", "")
+
+
+def _fmt_eps(eps: float) -> str:
+    """Format epsilon for legend labels, e.g. 1e-08 -> 1e-8."""
+    s = f"{eps:g}"
+    return re.sub(r"e([+-])0*(\d)", r"e\1\2", s).replace("e+", "e")
 
 
 def _derive_sibling_savepath(savepath: str, suffix: str) -> str:
@@ -410,7 +421,7 @@ def plot_results_multi(
 # -----------------------------
 # Plot: distance-only
 # -----------------------------
-def plot_distance_only(results_adam, actor_epsilons, *, m: int, savepath: str, sgd_baseline=None, plot_legend=True):
+def plot_distance_only(results_adam, actor_epsilons, *, m: int, savepath: str, sgd_baseline=None, plot_legend=True, add_y_label=False):
     fig, ax = plt.subplots(figsize=(5.7, 5))
 
     if sgd_baseline is not None:
@@ -435,21 +446,24 @@ def plot_distance_only(results_adam, actor_epsilons, *, m: int, savepath: str, s
             marker=mk,
             markersize=5,
             markevery=max(1, len(it_params) // 12),
-            label=rf"Adam $\epsilon={eps:g}$",
+            label=rf"Adam $\epsilon={_fmt_eps(eps)}$",
             alpha=0.95,
         )
 
     ax.set_yscale("log")
-    ax.set_xlabel("iteration", fontsize=20)
-    ax.set_ylabel(r"$\|\theta_t-\theta^\star\|_2$", fontsize=20)
+    ax.set_xlabel("iteration", fontsize=23)
+    if add_y_label:
+        ax.set_ylabel(r"$\|\theta_t-\theta^\star\|_2$", fontsize=23)
     ax.set_xticks([0, 200, 400, 600, 800, 1000])
     ax.set_yticks([1e-4, 1e-3, 1e-2, 1e-1, 1e0])
     ax.tick_params(axis="both", which="major", labelsize=16)
 
-    ax.set_title(f"M={m}", fontsize=22)
+    ax.set_title(f"M={m}", fontsize=25)
     ax.grid(True, which="both", alpha=0.25)
+    # Keep the axes box square regardless of y-label / legend / colorbar.
+    ax.set_box_aspect(1)
     if plot_legend:
-        ax.legend(fontsize=14, ncol=1, frameon=False)
+        ax.legend(fontsize=15, ncol=1, frameon=False)
 
     fig.tight_layout()
     out_dir = os.path.dirname(savepath)
@@ -471,6 +485,7 @@ def optimization_path_only(
     savepath: str,
     plot_legend: bool = True,
     sgd_baseline=None,
+    add_y_label=False,
 ):
     if len(results_adam) == 0:
         raise ValueError("results_adam must be non-empty")
@@ -519,21 +534,24 @@ def optimization_path_only(
             linestyle=ls,
             linewidth=3,
             alpha=0.95,
-            label=rf"Adam $\epsilon={eps:g}$",
+            label=rf"Adam $\epsilon={_fmt_eps(eps)}$",
         )
         ax.plot(mu_hist[0], sigma_hist[0], marker=mk, color=color, markersize=5, alpha=0.95)
         ax.plot(mu_hist[-1], sigma_hist[-1], marker=".", color=color, markersize=6, alpha=0.95)
 
     ax.plot(0.0, 0.0, marker="x", markersize=9, color="r", label="Optimum")
 
-    ax.set_xlabel(r"$\mu$", fontsize=18)
-    ax.set_ylabel(r"$\sigma$", fontsize=18)
-    ax.set_title(f"M={m}", fontsize=22)
+    ax.set_xlabel(r"$\mu$", fontsize=30)
+    if add_y_label:
+        ax.set_ylabel(r"$\sigma$", fontsize=30)
+    ax.set_title(f"M={m}", fontsize=25)
 
     ax.set_xlim(x_min, x_max)
     ax.set_ylim(y_min, y_max)
     ax.grid(True, alpha=0.25)
-    ax.tick_params(axis="both", which="major", labelsize=14)
+    ax.tick_params(axis="both", which="major", labelsize=20)
+    # Keep the axes box square regardless of y-label / legend / colorbar.
+    ax.set_box_aspect(1)
 
     if plot_legend:
         ax.legend(fontsize=12, frameon=False, loc="best")
@@ -587,6 +605,7 @@ def main():
     p.add_argument("--distance-only", action="store_true", help="Only plot distance-only figure")
     p.add_argument("--optimize-only", action="store_true", help="Only plot optimization-path-only figure")
     p.add_argument("--no-legend", action="store_true", help="Hide legends (paper)")
+    p.add_argument("--add-y-label", action="store_true", help="Add y-axis label")
 
     args = p.parse_args()
 
@@ -659,6 +678,7 @@ def main():
             savepath=distance_savepath,
             sgd_baseline=sgd_baseline,
             plot_legend=plot_legend,
+            add_y_label=args.add_y_label,
         )
         optimization_path_only(
             results_adam,
@@ -667,6 +687,7 @@ def main():
             savepath=opt_path_savepath,
             plot_legend=plot_legend,
             sgd_baseline=sgd_baseline,
+            add_y_label=args.add_y_label,
         )
         return
 
@@ -678,6 +699,7 @@ def main():
             savepath=distance_savepath,
             sgd_baseline=sgd_baseline,
             plot_legend=plot_legend,
+            add_y_label=args.add_y_label,
         )
         return
 
@@ -689,42 +711,9 @@ def main():
             savepath=opt_path_savepath,
             plot_legend=plot_legend,
             sgd_baseline=sgd_baseline,
+            add_y_label=args.add_y_label,
         )
         return
-
-    # default: multi + distance + opt-path
-    plot_results_multi(
-        results_adam,
-        actor_epsilons=actor_epsilons,
-        m=args.m,
-        title=title,
-        savepath=savepath,
-        xlim=xlim,
-        ylim=ylim,
-        add_contours=True,
-        plot_deltas=(not args.no_deltas),
-        sgd_baseline=sgd_baseline,
-        plot_legend=plot_legend,
-    )
-
-    plot_distance_only(
-        results_adam,
-        actor_epsilons=actor_epsilons,
-        m=args.m,
-        savepath=distance_savepath,
-        sgd_baseline=sgd_baseline,
-        plot_legend=plot_legend,
-    )
-
-    optimization_path_only(
-        results_adam,
-        actor_epsilons=actor_epsilons,
-        m=args.m,
-        savepath=opt_path_savepath,
-        plot_legend=plot_legend,
-        sgd_baseline=sgd_baseline,
-    )
-
 
 if __name__ == "__main__":
     main()

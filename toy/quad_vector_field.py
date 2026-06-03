@@ -8,10 +8,15 @@ import numpy as np
 import matplotlib as mpl
 from matplotlib.colors import LogNorm
 
-mpl.rcParams.update({
-    "text.usetex": False,
-    "font.family": "sans-serif",
+plt.rcParams.update({
+    "font.family": "serif",
+    "font.serif": ["cmr10", "Computer Modern Roman", "DejaVu Serif"],
     "mathtext.fontset": "cm",
+    "mathtext.rm": "serif",
+    "axes.formatter.use_mathtext": True,
+    "axes.unicode_minus": False,
+    "pdf.fonttype": 42,
+    "ps.fonttype": 42,
 })
 
 try:
@@ -86,6 +91,7 @@ def plot_gradients(
     cmap: str,
     m: int,
     with_entropy: bool,
+    add_y_label: bool,
 ):
     mu_np = np.asarray(mu_grid)
     sigma_np = np.asarray(sigma_grid)
@@ -130,11 +136,15 @@ def plot_gradients(
 
     ax.margins(x=0.04, y=0.06)  # 端でクリップされて短く見えるのを軽減
     ax.set_xlabel(r"$\mu$")
-    ax.set_ylabel(r"$\sigma$")
+    if add_y_label:
+        ax.set_ylabel(r"$\sigma$")
     ax.set_yticks([0.5, 1.0, 1.5, 2.0])
     ax.set_title(f"M={m}")
     if with_entropy:
         ax.set_title(f"M={m} (Ent.)")
+    # Force the axes drawing box to be square regardless of colorbar / y-label,
+    # so the plot shape is identical across all settings.
+    ax.set_box_aspect(1)
     return q
 
 def main() -> None:
@@ -163,7 +173,7 @@ def main() -> None:
     # Colorbar on/off (portable: works on Python 3.8+)
     parser.add_argument("--colorbar", dest="colorbar", action="store_true", help="Show colorbar.")
     parser.add_argument("--no-colorbar", dest="colorbar", action="store_false", help="Hide colorbar.")
-    parser.set_defaults(colorbar=True)
+    parser.add_argument("--add-y-label", action="store_true", help="Add y-axis label.")
 
     # Paper-friendly colormap choices (sequential)
     cmap_choices = [
@@ -174,6 +184,7 @@ def main() -> None:
         "RdYlBu", "twilight",
     ]
     parser.add_argument("--cmap", type=str, default="Blues", choices=cmap_choices)
+    parser.add_argument("--plot-format", type=str, default="pdf", choices=["pdf", "png"])
 
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
@@ -187,10 +198,10 @@ def main() -> None:
     plt.rcParams.update(
         {
             "font.size": 11,
-            "axes.titlesize": 23,
+            "axes.titlesize": 25,
             "axes.labelsize": 33,
-            "xtick.labelsize": 14,
-            "ytick.labelsize": 14,
+            "xtick.labelsize": 18,
+            "ytick.labelsize": 18,
         }
     )
 
@@ -222,11 +233,12 @@ def main() -> None:
         cmap=args.cmap,
         m=args.m,
         with_entropy=args.alpha > 0.0,
+        add_y_label=args.add_y_label,
     )
 
     if args.colorbar:
         cbar = fig.colorbar(q, ax=ax, pad=0.02)
-        cbar.set_label(r"$\|\nabla\|$")
+        #cbar.set_label(r"$\|\nabla\|$")
 
     fig.tight_layout()
 
@@ -236,10 +248,10 @@ def main() -> None:
         f"_alpha={args.alpha}"
         f"_norm={args.normalize}"
         f"_cmap={args.cmap}"
-        f"_cb={args.colorbar}.pdf"
+        f"_cb={args.colorbar}.{args.plot_format}"
     )
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    fig.savefig(out, dpi=300)
+    fig.savefig(out, dpi=300, format=args.plot_format, bbox_inches="tight", pad_inches=0.02)
 
 
 if __name__ == "__main__":
