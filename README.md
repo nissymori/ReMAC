@@ -1,4 +1,4 @@
-# The Official Implementation of "Retry Policy Gradients for Continuous Action Spaces"
+# The Official Code for "Retry Policy Gradients for Continuous Action Spaces"
 
 # Install dependencies
 ```bash
