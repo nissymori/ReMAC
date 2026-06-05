@@ -56,7 +56,7 @@ At `brax/`
 ```
 
 ## Related Work and Extensions
-- [Emergence of Exploration in Policy gradient reinforcement learning via Retrying](https://arxiv.org/abs/2606.00151v1) (ICML 2026)
+- [Emergence of Exploration in Policy gradient reinforcement learning via Retrying](https://arxiv.org/abs/2606.00151) (ICML 2026)
   - Proposal of ReMax in discrete action and PPO variant, **Re**Max **PPO** (**RePPO**) [code](https://github.com/nissymori/remax-rl)
 
 - [OrderGrad: Optimizing Beyond the Mean with Order-Statistic Policy Gradient Estimation](https://arxiv.org/abs/2606.06096)
