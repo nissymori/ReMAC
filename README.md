@@ -1,4 +1,7 @@
 # The Official Code for "Retry Policy Gradients for Continuous Action Spaces"
+[![arXiv](https://img.shields.io/badge/arXiv-2606.05888-b31b1b.svg)](https://arxiv.org/abs/2606.05888)
+
+
 
 # Install dependencies
 ```bash
