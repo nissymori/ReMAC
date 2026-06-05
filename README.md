@@ -55,3 +55,18 @@ At `brax/`
 ./sh/ppo.sh  # for PPO
 ```
 
+## See Also
+- [ReMax PPO](https://github.com/nissymori/ReMAC): Proposal of ReMax in discrete action. [code](https://github.com/nissymori/ReMAC), [paper](https://arxiv.org/abs/2606.05888).
+- [OrderGrad](https://github.com/paavo5/ordergrad): Generalization of ReMax to **Any** order statistics. [library](https://github.com/paavo5/ordergrad), [paper](https://arxiv.org/abs/2606.06096)
+
+
+## Cite us
+```bibtex
+@article{nishimori2026retry,
+  title={Retry Policy Gradients in Continuous Action Spaces},
+  author={Soichiro Nishimori and Paavo Parmas},
+  year={2026},
+  journal={arXiv preprint arXiv:2606.05888},
+}
+```
+
