@@ -56,7 +56,7 @@ At `brax/`
 ```
 
 ## See Also
-- [ReMax PPO](https://github.com/nissymori/ReMAC): Proposal of ReMax in discrete action. [code](https://github.com/nissymori/ReMAC), [paper](https://arxiv.org/abs/2606.05888).
+- [ReMax PPO](https://github.com/nissymori/remax-rl): Proposal of ReMax in discrete action. [code](https://github.com/nissymori/remax-rl), [paper](https://arxiv.org/abs/2606.00151v1).
 - [OrderGrad](https://github.com/paavo5/ordergrad): Generalization of ReMax to **Any** order statistics. [library](https://github.com/paavo5/ordergrad), [paper](https://arxiv.org/abs/2606.06096)
 
 
