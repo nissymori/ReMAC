@@ -1,0 +1,74 @@
+# Sparse-reward Reacher.
+#
+# Identical to configs/brax/reacher.yaml except:
+#   (1) env: brax/sparse_reacher   -- reward replaced by r_t = 1{d_t < 0.05}
+#       (JaxGCRL convention); physics, observations and termination unchanged.
+#   (2) env_params.episode_length is set explicitly for EVERY algorithm.
+#       In reacher.yaml it was set for sac/ppo (50) but omitted for remax_ac,
+#       which therefore silently used Brax's default of 1000 -- a 20x longer
+#       episode, making the SAC-vs-ReMAC return comparison invalid.
+#
+# All other hyperparameters are copied verbatim from reacher.yaml.
+
+sac:
+  env: brax/sparse_reacher
+  env_params:
+    episode_length: 50
+  agent_kwargs:
+    activation: tanh
+  num_envs: 128
+  buffer_size: 1000000
+  fill_buffer: 10000
+  batch_size: 512
+  learning_rate: 0.0004617429169256732
+  num_epochs: 128
+  total_timesteps: 5242880
+  eval_freq: 32768
+  gamma: 0.95
+  polyak: 0.99
+  target_entropy_ratio: 0
+  normalize_observations: true
+
+remax_ac:
+  env: brax/sparse_reacher
+  agent_kwargs:
+    activation: tanh
+  num_envs: 128
+  buffer_size: 1000000
+  fill_buffer: 10000
+  batch_size: 512
+  learning_rate: 0.0005
+  num_epochs: 128
+  total_timesteps: 5242880
+  eval_freq: 32768
+  gamma: 0.95
+  polyak: 0.99
+  target_entropy_ratio: 0
+  normalize_observations: true
+  remax_num_samples: 16
+  remax_m: 4
+  actor_epsilon: 1e-8
+  soft_critic: false
+  env_params:
+    episode_length: 50
+
+ppo:
+  env: brax/sparse_reacher
+  env_params:
+    episode_length: 50
+  agent_kwargs:
+    activation: tanh
+  num_envs: 128
+  num_steps: 128
+  num_epochs: 8
+  num_minibatches: 64
+  learning_rate: 0.00027520696850790545
+  max_grad_norm: 0.1
+  total_timesteps: 1048576
+  eval_freq: 32768
+  gamma: 0.95
+  gae_lambda: 0.95
+  clip_eps: 0.2
+  ent_coef: 0.01
+  vf_coef: 0.5
+  normalize_observations: true
