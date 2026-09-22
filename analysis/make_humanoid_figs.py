@@ -5,7 +5,7 @@ task is also shown as a learning curve.  This script closes that gap without tou
 figure already included in the paper: it writes only new filenames.
 
 Style (rcParams, M -> hue, baseline styles) is imported from plot.py, and the M encoding
-(hue + linestyle + marker) is the one make_cxt2_figs.py uses for the epsilon sweeps, so the
+(hue + linestyle + marker) is the one make_eps_sweeps.py uses for the epsilon sweeps, so the
 panels read exactly like Figs. 3, 4 and 7-14.
 
 Outputs
@@ -33,7 +33,7 @@ from plot import (  # noqa: E402  (shared styling: keeps us consistent with Figs
     BASELINE_STYLES,
     _paper_rcparams,
 )
-from make_cxt2_figs import (  # noqa: E402  (shared data handling: same pkl, same filters)
+from make_eps_sweeps import (  # noqa: E402  (shared data handling: same pkl, same filters)
     EPS_LABEL,
     MS,
     M_COLOR,

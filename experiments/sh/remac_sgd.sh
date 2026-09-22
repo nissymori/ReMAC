@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# ReMAC rebuttal experiment (1)+(2)+(3): ReMAC with a plain-SGD actor.
+# ReMAC with a plain-SGD actor (Tab. 8).
 # Carries the dampening (actor_update_norm vs actor_grad_norm) and
 # entropy-via-sigma (policy_std, sigma_grad) diagnostics for free via train/* .
 # ReMAC m in {1,2,4} on halfcheetah/ant/hopper.
 # wandb project: remac-sgd-report
 #
-# NOTE: SGD has no epsilon -- `actor_epsilon` is ignored when
-# actor_optimizer=sgd. The Adam epsilon sweep exists only as the *comparison*
-# side of reviewer point (1) ("comparable to Adam under some choice of
-# epsilon?"), and that Adam data was already collected in the `remac-report`
-# project. So the Adam sweep is OPT-IN via --adam-sweep and is off by default.
-# SAC baselines likewise already exist; opt in with --sac.
+# NOTE: SGD has no epsilon -- `actor_epsilon` is ignored when actor_optimizer=sgd.
+# The Adam epsilon sweep here exists only to answer "is SGD comparable to Adam under
+# some choice of epsilon?", and that Adam data is already collected by the coverage
+# sweep, so it is OPT-IN via --adam-sweep and off by default.  SAC baselines likewise
+# already exist; opt in with --sac.
 set -uo pipefail   # not -e: one failed run must not abort the whole sweep
 
 # Run from anywhere: every path below is relative to brax/.

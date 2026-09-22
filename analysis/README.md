@@ -8,7 +8,7 @@ from the **repository root**.
 | file | what it is |
 |---|---|
 | `data/brax-remax-ac-report.pkl.gz` | The frame every Brax figure is drawn from: one row per (run, seed, step), long format. Read with `pandas.read_pickle`. |
-| `data/remac_rebuttal_data.pkl` | The additional experiments (SGD actor, state coverage); see `experiments/README.md`. |
+| `data/diagnostics.pkl` | The diagnostic runs (SGD actor, state coverage); see `experiments/README.md`. |
 
 The first frame was originally fetched from wandb by `fetch_wandb_data_with_seeds()` in
 `plot.py`, which `plot.py` still calls when `--cache` points at a file that does not
@@ -23,7 +23,8 @@ n = 10.
 |---|---|
 | `plot.sh` | Regenerates every Brax figure from `data/` into `fig/`. |
 | `plot.py` | The main learning-curve figures. Subcommands: `2x4` (the eight main tasks), `2x3` (the original six), `lr-sweep`, `lr-sweep-grid`, `b-ablation`, `damping`. |
-| `make_cxt2_figs.py` | The per-epsilon M sweeps, Figs. 7-14. |
+| `make_eps_sweeps.py` | The per-epsilon M sweeps, Figs. 7-14. |
+| `make_diagnostic_figs.py` | Fig. 18, and the figure form of the diagnostic tables. |
 | `make_humanoid_figs.py` | HumanoidStandup on its own, in the same visual language. |
 | `make_tables.py` | The LaTeX bodies of Tabs. 4, 6, 7, 8, 9 -- printed from the data rather than transcribed. |
 | `parse_brax_logs.py` | Turns stdout run logs into rows of the frame's schema, and merges them into it. Needed because the runs added for the camera-ready version were logged to files, not wandb. |

@@ -1,24 +1,18 @@
-"""Figures requested by Reviewer cxT2 (rebuttal), from data/brax-remax-ac-report.pkl.gz.
+"""The per-epsilon M sweeps: Figs. 7-14, drawn from the report frame.
 
-Style is imported from plot.py, so these figures are drawn with exactly the same
-rcParams, M -> colour map and baseline styles as the paper's Figs. 3 and 4.
+One figure per epsilon, with M = 1, 2, 4, 8 overlaid in every environment panel, so
+the effect of the retry budget is directly readable at a fixed optimizer setting.
+Colour is therefore free to carry M, and reuses the assignment of Figs. 3 and 4
+(M = 1, 2, 4, 8 -> blue, orange, green, red).  A distinct line style and marker per M
+is layered on top, giving three redundant channels, so the four curves stay separable
+in a small panel and in greyscale.  Each panel holds four curves, not sixteen.
 
-1. HumanoidStandup (cxT2 #1: "Add experiments on Humanoid").
-   rejax only ships a HumanoidStandup config, which is also the highest-dimensional
-   task in the suite (d = 17 action dims).
-       -> fig/humanoidstandup.pdf
+    -> fig/{entropy,return}_vary_m_eps_{1em8,1em2,1em1,1}.pdf
 
-2. The epsilon sweeps (cxT2 #4).  One figure per epsilon, with M = 1, 2, 4, 8 overlaid in
-   each environment panel, so the effect of the retry budget is directly visible at a
-   fixed optimizer setting.  M is encoded by
+Style is imported from plot.py, so these are drawn with exactly the same rcParams,
+M -> colour map and baseline styles as Figs. 3 and 4.
 
-       colour           = the tab10 hue the paper already uses in Figs. 3 and 4
-       linestyle+marker = a redundant second/third channel
-
-   so the four curves stay separable in a small panel and in greyscale.
-       -> fig/{entropy,return}_vary_m_eps_{1em8,1em2,1em1,1}.pdf
-
-Run:  python analysis/make_cxt2_figs.py
+Run:  python analysis/make_eps_sweeps.py
 """
 
 import os
@@ -113,7 +107,7 @@ def style_axis(ax, env, metric):
     ax.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
 
 
-# ------------------------------------------------------------------ figure 1
+# ------------------------------------------- HumanoidStandup on its own
 def fig_humanoidstandup(d, eps=1e-8):
     """Same visual language as Figs. 3 and 4: colour = M, solid lines, SAC/PPO baselines."""
     env = "humanoidstandup"
@@ -151,7 +145,7 @@ def fig_humanoidstandup(d, eps=1e-8):
     print(f"Saved: {out}")
 
 
-# ------------------------------------------------------------------ figures 8-15
+# ------------------------------------------------------------------ Figs. 7-14
 # One figure per epsilon, with M = 1, 2, 4, 8 overlaid in every environment panel, so the
 # effect of the retry budget is directly readable at a fixed optimizer setting.  Colour is
 # therefore free to carry M, and it reuses the paper's assignment from Figs. 3 and 4
