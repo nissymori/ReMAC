@@ -21,13 +21,19 @@ sac:
 
 remax_ac:
   env: brax/pusher
+  # FIX: this block previously omitted env_params, so remax_ac silently used
+  # Brax's default episode_length=1000 while sac/ppo used 100 -- a 10x longer
+  # episode, which would make the SAC-vs-ReMAC return comparison on Pusher
+  # invalid (same bug that was fixed for Reacher).
+  env_params:
+    episode_length: 100
   agent_kwargs:
     activation: tanh
   num_envs: 128
   buffer_size: 1_000_000
   fill_buffer: 10_000
   batch_size: 512
-  learning_rate: 0.00020495107742294415
+  learning_rate: 0.0002   # tuned for ReMAC (Tab. 2); rejax's SAC value was 2.0495e-4
   num_epochs: 128
   total_timesteps: 5242880
   eval_freq: 32768
