@@ -10,6 +10,11 @@
 #   analysis: python ref/knn_state_entropy.py --states-dir <dir> --k 4 --k-check
 set -uo pipefail
 
+# Run from anywhere: every path below is relative to brax/.
+cd "$(dirname "$0")/../../brax"
+export PYTHONPATH="$(cd ../experiments && pwd)${PYTHONPATH:+:$PYTHONPATH}"
+
+
 GPU="0"
 JOBS=""                          # "env:method" pairs, e.g. "ant:sac ant:remac_m1"
 OUT="eval_states"

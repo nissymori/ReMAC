@@ -197,34 +197,6 @@ def fetch_wandb_data_with_seeds(
 # Defaults (edit to match your runs)
 # ============================================================
 
-# A learning rate no run can have, used when the selected value is not on disk yet.
-# Deliberately not NaN -- see _pusher_lr().
-_UNMATCHABLE_LR = -1.0
-
-
-def _pusher_lr(_path="data/PUSHER_LR", _default=None):
-    """The learning rate analysis/pick_pusher_lr.py selected for Pusher.
-
-    Read from disk rather than hard-coded: the ReMAC rows of a figure are filtered by
-    exact learning rate, so a stale constant here would silently plot a different
-    sweep's runs.
-
-    When the file is absent the fallback is a sentinel that no run can match, NOT NaN:
-    _prepare_plot_df() treats an env whose default lr is NaN as "unknown" and keeps its
-    rows *unfiltered*, which would pool every learning rate into one curve.  A sentinel
-    empties the Pusher panel instead, which is a visible failure rather than a wrong one.
-    """
-    import os
-    for p in (_path, os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  "..", "data", "PUSHER_LR"),
-              "data/PUSHER_LR"):
-        try:
-            with open(p) as fh:
-                return float(fh.read().strip())
-        except (OSError, ValueError):
-            continue
-    return _default if _default is not None else _UNMATCHABLE_LR
-
 DEFAULT_ENV_LR: Dict[str, float] = {
     "brax/ant": 2e-4,
     "brax/halfcheetah": 1e-4,
@@ -233,7 +205,7 @@ DEFAULT_ENV_LR: Dict[str, float] = {
     "brax/reacher": 3e-4,   # re-tuned after the episode_length fix (was 5e-4)
     "brax/swimmer": 1e-4,
     "brax/humanoidstandup": 1e-4,
-    "brax/pusher": _pusher_lr(),
+    "brax/pusher": 2e-4,       # tuned for the camera-ready version
 }
 
 # Environment order of the paper's main grids: the six envs of Figs. 3-4 (2x3), and the

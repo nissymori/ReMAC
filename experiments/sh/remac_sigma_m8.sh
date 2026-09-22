@@ -20,6 +20,7 @@
 #
 # Usage:  ./remac_sigma_m8.sh --gpu 0 --jobs "walker2d:1 walker2d:2"
 set -uo pipefail   # not -e: one failed run must not abort the sweep
+
 # Run from anywhere: every path below is relative to brax/.
 cd "$(dirname "$0")/../../brax"
 

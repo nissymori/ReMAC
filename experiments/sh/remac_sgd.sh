@@ -12,6 +12,7 @@
 # project. So the Adam sweep is OPT-IN via --adam-sweep and is off by default.
 # SAC baselines likewise already exist; opt in with --sac.
 set -uo pipefail   # not -e: one failed run must not abort the whole sweep
+
 # Run from anywhere: every path below is relative to brax/.
 cd "$(dirname "$0")/../../brax"
 

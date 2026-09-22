@@ -21,7 +21,7 @@ Per environment:
 Entropies are comparable only within an environment (N and d are fixed there).
 
 Usage:
-    python additional_experiments/knn_state_entropy.py --states-dir <dir> [--k 4] [--k-check]
+    python experiments/knn_state_entropy.py --states-dir <dir> [--k 4] [--k-check]
 """
 
 import argparse

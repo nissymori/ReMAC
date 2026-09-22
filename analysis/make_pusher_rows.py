@@ -32,7 +32,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from parse_brax_logs import logs_to_frame  # noqa: E402
 
 BRAX = "brax"
-LR_FILE = "data/PUSHER_LR"
 MS = [1, 2, 4, 8]
 SGD_MS = [1, 2, 4]          # Tab. 8 covers M = 1, 2, 4
 LAST_FRAC = 0.1
@@ -93,11 +92,13 @@ def _pm(v, prec=0):
 
 
 def table2():
+    """Tab. 2's Pusher row.  The value is the one analysis/pick_pusher_lr.py selected and
+    that configs/brax/pusher.yaml now carries; it is read from the config so the
+    table and the config cannot drift apart."""
     print("% --- Tab. 2: the selected learning rate for Pusher")
-    if not os.path.exists(LR_FILE):
-        print(f"%   {LR_FILE} does not exist yet (run analysis/pick_pusher_lr.py)")
-        return
-    lr = float(open(LR_FILE).read().strip())
+    import yaml
+    cfg = os.path.join(BRAX, "configs", "brax", "pusher.yaml")
+    lr = float(yaml.safe_load(open(cfg))["remax_ac"]["learning_rate"])
     exp = int(np.floor(np.log10(lr)))
     mant = lr / 10 ** exp
     tex = (f"$10^{{{exp}}}$" if abs(mant - 1) < 1e-9

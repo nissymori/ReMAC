@@ -1,6 +1,6 @@
 """Pick ReMAC's learning rate on Pusher, the eighth main task.
 
-Reads the tuning logs written by brax/sh/pusher_tune.sh and applies the paper's
+Reads the tuning logs written by experiments/sh/pusher_tune.sh and applies the paper's
 protocol (App. C.1): sweep lr in {1e-4, 2e-4, 3e-4, 5e-4, 1e-3} with 3 seeds and
 "select a value that performed consistently well across environments and M".
 Here there is a single environment, so the selection is across M, exactly as in
@@ -12,21 +12,19 @@ Unlike the Reacher tuning, each (M, lr) cell is its own log file (so the 20 cell
 could be spread over the four GPUs), and each file carries a `#CONFIG` header, so
 M and lr are read from the header rather than from an in-log banner.
 
-The selected value is written to data/PUSHER_LR, which is what the plotting
-scripts and brax/sh/lib_runlog.sh read, so the number is never transcribed by hand.
+The selected value is what configs/brax/pusher.yaml carries in its remax_ac: block
+and what plot.py lists in DEFAULT_ENV_LR, so rerunning this is how those two numbers
+are checked rather than trusted.
 
-    python analysis/pick_pusher_lr.py            # report + write data/PUSHER_LR
-    python analysis/pick_pusher_lr.py --no-write # report only
+    python analysis/pick_pusher_lr.py
 """
 
 import argparse
 import glob
-import os
 import re
 from collections import defaultdict
 
 LOG_GLOB = "brax/logs/pusher/tune_m*_lr*.log"
-OUT_FILE = "data/PUSHER_LR"
 MS = [1, 2, 4, 8]
 LRS = [0.0001, 0.0002, 0.0003, 0.0005, 0.001]
 
@@ -84,7 +82,6 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--glob", default=LOG_GLOB)
     ap.add_argument("--last-frac", type=float, default=0.1)
-    ap.add_argument("--no-write", action="store_true")
     args = ap.parse_args()
 
     cells, tail_cells, incomplete, finished = {}, {}, [], set()
@@ -143,13 +140,8 @@ def main():
     print(f"\nselected lr = {best:g}  (best worst-case over M: {complete_lrs[best][0]:.2f}, "
           f"mean over M: {complete_lrs[best][1]:.2f})")
 
-    if not args.no_write:
-        os.makedirs(os.path.dirname(OUT_FILE), exist_ok=True)
-        with open(OUT_FILE, "w") as fh:
-            fh.write(f"{best:g}\n")
-        print(f"wrote {OUT_FILE}")
-    print("\nnext:  cd brax && "
-          f"PUSHER_LR={best:g} bash sh/pusher_final.sh <gpu> \"m1 m2 m4 m8 sac ppo\"")
+    print(f"\nconfigs/brax/pusher.yaml and plot.py's DEFAULT_ENV_LR should both read "
+          f"{best:g}; update them if they do not.")
 
 
 if __name__ == "__main__":

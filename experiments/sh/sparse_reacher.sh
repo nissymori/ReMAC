@@ -9,6 +9,11 @@
 #   ALGO_TAG in {sac, m1, m2, m4, m8}
 set -euo pipefail
 
+# Run from anywhere: every path below is relative to brax/.
+cd "$(dirname "$0")/../../brax"
+export PYTHONPATH="$(cd ../experiments && pwd)${PYTHONPATH:+:$PYTHONPATH}"
+
+
 TAG=$1
 GPU=$2
 
@@ -23,7 +28,7 @@ seed=1
 actor_epsilon=1e-8          # Adam's default, as in the main results
 wandb_project="brax-remax-sparse-reacher"
 
-CFG=configs/brax/sparse_reacher.yaml
+CFG=../experiments/configs/sparse_reacher.yaml
 COMMON="--config $CFG --num-seeds=$num_seeds --seed_id=$seed \
         --set total_timesteps=$total_timesteps --set eval_freq=$eval_freq \
         --wandb --wandb-project=$wandb_project"

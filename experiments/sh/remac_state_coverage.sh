@@ -3,6 +3,7 @@
 # ReMAC m in {1,2,4} and SAC, on halfcheetah/ant/hopper, logging coverage/* .
 # wandb project: remac-coverage-report
 set -uo pipefail   # not -e: one failed run must not abort the whole sweep
+
 # Run from anywhere: every path below is relative to brax/.
 cd "$(dirname "$0")/../../brax"
 
