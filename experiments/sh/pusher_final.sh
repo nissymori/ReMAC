@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Phase 2 for Pusher: the main-experiment runs at Adam's default eps = 1e-8.
 #
-# Protocol is the paper's (App. C.1), as in sh/remac.sh and sh/reacher_final.sh:
+# Protocol is the paper's (App. C.1), as in experiments/sh/main_remac.sh and sh/reacher_final.sh:
 #   3M steps, eval every 30k, 10 seeds, eps = 1e-8, the re-tuned lr of Phase 1,
 #   B = 16 if M = 8 else 8.  SAC and PPO keep their own rejax-tuned lr.
 # The 10 seeds are vmapped in one process; Pusher (obs = 23, d = 7) fits them on

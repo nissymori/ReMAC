@@ -1,6 +1,6 @@
 """Aggregate the Tab. 7 extension runs from their stdout logs.
 
-The extension sweep (experiments/sh/remac_sigma_m8.sh) writes one log per
+The extension sweep (experiments/sh/diag_scale_gradient.sh) writes one log per
 process to brax/logs/sigma_m8/runs/remac_m{M}_{env}_seed{SEED}.log.  wandb was unavailable,
 so the metrics are read back from the two line formats train.py prints:
 

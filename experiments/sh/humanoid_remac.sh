@@ -1,3 +1,6 @@
+# Run from anywhere: every path below is relative to brax/.
+cd "$(dirname "$0")/../../brax"
+
 gpu=$1
 m=$2
 

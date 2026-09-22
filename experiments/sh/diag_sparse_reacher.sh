@@ -5,13 +5,12 @@
 # observations, episode length and every hyperparameter are identical to the
 # dense Reacher, so the reward is the only difference.
 #
-# Usage:  bash sh/sparse_reacher.sh <ALGO_TAG> <GPU_ID>
+# Usage:  bash experiments/sh/diag_sparse_reacher.sh <ALGO_TAG> <GPU_ID>
 #   ALGO_TAG in {sac, m1, m2, m4, m8}
 set -euo pipefail
 
 # Run from anywhere: every path below is relative to brax/.
 cd "$(dirname "$0")/../../brax"
-export PYTHONPATH="$(cd ../experiments && pwd)${PYTHONPATH:+:$PYTHONPATH}"
 
 
 TAG=$1
