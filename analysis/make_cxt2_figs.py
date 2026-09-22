@@ -34,7 +34,6 @@ from plot import (  # noqa: E402  (shared styling: keeps us consistent with Figs
     BASELINE_STYLES,
     M_TO_TAB10_INDEX,
     _paper_rcparams,
-    _pusher_lr,
 )
 
 DATA = os.environ.get("REMAC_DATA", "data/brax-remax-ac-report.pkl.gz")
@@ -43,7 +42,7 @@ OUT = "fig"
 DEFAULT_LR = {
     "halfcheetah": 1e-4, "ant": 2e-4, "hopper": 3e-4,
     "reacher": 3e-4, "swimmer": 1e-4, "walker2d": 1e-4, "humanoidstandup": 1e-4,
-    "pusher": _pusher_lr(),
+    "pusher": 2e-4,
 }
 # The paper's design: M <= 4 -> B = 8, M = 8 -> B = 16 (for eps != 1e-8 the M=8 runs
 # only exist at B=16, so this keeps every curve in a figure on a consistent B).
