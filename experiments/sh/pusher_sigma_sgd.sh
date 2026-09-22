@@ -8,7 +8,7 @@
 #     budget with the SGD arm and differs only in the actor optimizer.
 #
 # Protocol matches the existing rows of both tables (see
-# additional_experiments/sh/remac_sigma_m8.sh and remac_sgd.sh): B = 16 for every M,
+# additional_experiments/sh/diag_scale_gradient.sh and remac_sgd.sh): B = 16 for every M,
 # the tuned lr, the config default eps = 1e-8, 3M steps, eval every 30k, 10 seeds.
 # The Adam M = 8 cell duplicates sh/pusher_final.sh's m8 run (same config), so it
 # is taken from there rather than re-run.

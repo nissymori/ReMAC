@@ -7,6 +7,9 @@
 # those are the runs the paper reports.  Pusher was added for the camera-ready
 # version and has its own phase scripts, sh/pusher_{tune,final,eps,sigma_sgd}.sh.
 #
+# Run from anywhere: every path below is relative to brax/.
+cd "$(dirname "$0")/../../brax"
+
 export CUDA_VISIBLE_DEVICES=0
 total_timesteps=3000000
 eval_freq=30000

@@ -11,11 +11,9 @@ pip install -r requirements.txt
 ## Repository layout
 
 ```
-brax/          ReMAC, SAC, PPO, TD3 on Brax, the environment configs, and the
-               main sweeps (brax/sh/)
+brax/          ReMAC, SAC, PPO, TD3 on Brax, and the environment configs
 toy/           the fixed-state toy problem of Sec. 3
-experiments/   the sweeps for the tasks added or re-run since the first
-               release, and the appendix diagnostics (own README)
+experiments/   every run script, and the modules only they need (own README)
 analysis/      everything that turns runs into the figures and tables (own README)
 data/          the data the figures are drawn from
 ```
@@ -57,10 +55,10 @@ Pusher.
 
 #### Tuning the learning rate
 Sweep `lr` over {1e-4, 2e-4, 3e-4, 5e-4, 1e-3} with 3 seeds at eps = 1e-8, and take the
-value that does well across every M (App. C.1). At `brax/`:
+value that does well across every M (App. C.1).
 
 ```bash
-./sh/tune/tune_remax.sh        # the six original tasks
+bash experiments/sh/main_tune_lr.sh                # the six original tasks
 bash experiments/sh/reacher_tune.sh 0 "1:0.0001"   # Reacher, re-tuned after the fix below
 bash experiments/sh/pusher_tune.sh  0 "1:0.0001"   # Pusher
 ```
@@ -71,19 +69,19 @@ by eye. The selected learning rates are in Tab. 2 of the paper and are the defau
 each config's `remax_ac:` block.
 
 #### Running the experiments
-At `brax/`:
+Every run script lives in `experiments/sh/` and `cd`s into `brax/` itself, so it can be
+launched from anywhere.  The names sort into groups: `main_*` is the comparison across
+tasks, a task prefix is that task's own phases, and `diag_*` is an appendix diagnostic.
 
 ```bash
-./sh/remac.sh   # ReMAC on the six original tasks and HumanoidStandup, at every eps
-./sh/sac.sh     # SAC
-./sh/ppo.sh     # PPO
-./sh/td3.sh     # TD3
-
+bash experiments/sh/main_remac.sh   # ReMAC on the six original tasks and HumanoidStandup, at every eps
+bash experiments/sh/main_sac.sh     # SAC
+bash experiments/sh/main_ppo.sh     # PPO
+bash experiments/sh/main_td3.sh     # TD3
 ```
 
 Reacher and Pusher have their own phase scripts, for the reason in the note below, and
-HumanoidStandup has the epsilon arm the original sweep did not cover.  These are run
-from the repository root:
+HumanoidStandup has the epsilon arm the original sweep did not cover:
 
 ```bash
 bash experiments/sh/reacher_final.sh dense m4 0 3e-4

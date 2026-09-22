@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Phase 1 for Pusher (the eighth main task): tune ReMAC's learning rate.
 #
-# Protocol is the paper's (App. C.1), identical to sh/tune/tune_remax.sh and
+# Protocol is the paper's (App. C.1), identical to experiments/sh/main_tune_lr.sh and
 # sh/reacher_tune.sh:
 #   lr in {1e-4, 2e-4, 3e-4, 5e-4, 1e-3},  3 seeds,  eps = 1e-8,
 #   3M steps,  B = 16 if M = 8 else 8.
@@ -29,7 +29,7 @@ export MPLBACKEND=Agg
 
 env=pusher
 total_timesteps=3000000
-eval_freq=100000            # as in sh/tune/tune_remax.sh
+eval_freq=100000            # as in experiments/sh/main_tune_lr.sh
 num_seeds=3
 seed=1                      # tuning seeds; the final runs use a different seed
 actor_epsilon=1e-8

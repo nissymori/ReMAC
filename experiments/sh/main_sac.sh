@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Run from anywhere: every path below is relative to brax/.
+cd "$(dirname "$0")/../../brax"
+
+
 # defaults
 GPU="0"
 m="2"

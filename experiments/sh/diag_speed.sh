@@ -1,3 +1,6 @@
+# Run from anywhere: every path below is relative to brax/.
+cd "$(dirname "$0")/../../brax"
+
 total_timesteps=3000000
 eval_freq=300000
 num_seeds=10
