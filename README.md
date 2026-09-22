@@ -53,51 +53,52 @@ The configurations are in `brax/configs/brax/`. The main evaluation is eight Bra
 tasks: Ant, HalfCheetah, Hopper, Reacher, Swimmer, Walker2d, HumanoidStandup and
 Pusher.
 
-#### Tuning the learning rate
-Sweep `lr` over {1e-4, 2e-4, 3e-4, 5e-4, 1e-3} with 3 seeds at eps = 1e-8, and take the
-value that does well across every M (App. C.1).
+#### Three phases, any task
+
+Every task goes through the same three phases, so there are three scripts rather than
+one per task. Each takes the task as its first argument and `cd`s into `brax/` itself,
+so it can be launched from anywhere.
 
 ```bash
-bash experiments/sh/main_tune_lr.sh                # the six original tasks
-bash experiments/sh/reacher_tune.sh 0 "1:0.0001"   # Reacher, re-tuned after the fix below
-bash experiments/sh/pusher_tune.sh  0 "1:0.0001"   # Pusher
+bash experiments/sh/tune.sh  <ENV> <GPU> "<M:LR> ..."    # the learning-rate sweep
+bash experiments/sh/final.sh <ENV> <GPU> "<TAG> ..."     # the reported runs, eps = 1e-8
+bash experiments/sh/eps.sh   <ENV> <GPU> "<M:EPS> ..."   # the epsilon sweep
 ```
 
-`python analysis/pick_reacher_lr.py` and `python analysis/pick_pusher_lr.py` apply the
-selection rule to the sweep's logs, so the chosen value is read off the data rather than
-by eye. The selected learning rates are in Tab. 2 of the paper and are the defaults in
-each config's `remax_ac:` block.
+`TAG` is `m1`, `m2`, `m4`, `m8`, `sac`, `ppo` or `td3`. `final.sh` and `eps.sh` also take
+`--lr` and `--bs`, which is how the lr-versus-epsilon probes of Figs. 15 and 16 and the
+`B` ablation of Fig. 17 are run.
 
-#### Running the experiments
-Every run script lives in `experiments/sh/` and `cd`s into `brax/` itself, so it can be
-launched from anywhere.  The names sort into groups: `main_*` is the comparison across
-tasks, a task prefix is that task's own phases, and `diag_*` is an appendix diagnostic.
+What differs between tasks is not the procedure but three numbers -- the tuned learning
+rate, the action-sample batch size, and how the ten seeds are split across processes --
+and those live in `experiments/lib_runlog.sh` as `lr_for`, `b_for_m` and `seeds_for`.
+The split is per task because the seeds are vmapped and an 11 GB card fits ten of them
+for Pusher but only one for HumanoidStandup.
+
+`make_queue.sh` writes out the full matrix for a phase, so the set of runs behind a
+figure is one command away:
 
 ```bash
-bash experiments/sh/main_remac.sh   # ReMAC on the six original tasks and HumanoidStandup, at every eps
-bash experiments/sh/main_sac.sh     # SAC
-bash experiments/sh/main_ppo.sh     # PPO
-bash experiments/sh/main_td3.sh     # TD3
+bash experiments/sh/make_queue.sh final > brax/logs/queue/jobs.txt   # Figs. 3, 4
+bash experiments/sh/make_queue.sh eps  >> brax/logs/queue/jobs.txt   # Figs. 7-14
+bash experiments/sh/make_queue.sh lr   >> brax/logs/queue/jobs.txt   # Figs. 15, 16
+bash experiments/sh/make_queue.sh bs   >> brax/logs/queue/jobs.txt   # Fig. 17
+bash experiments/sh/make_queue.sh tune >> brax/logs/queue/jobs.txt   # Tab. 2
 ```
 
-Reacher and Pusher have their own phase scripts, for the reason in the note below, and
-HumanoidStandup has the epsilon arm the original sweep did not cover:
-
-```bash
-bash experiments/sh/reacher_final.sh dense m4 0 3e-4
-bash experiments/sh/reacher_eps.sh   0 3e-4 "4:1e-2"
-bash experiments/sh/pusher_final.sh  0 "m1 m2 m4 m8 sac ppo"
-bash experiments/sh/pusher_eps.sh    0 "4:1e-2"
-bash experiments/sh/humanoid_eps.sh  0 1e-2 "4:2"
-```
-
-Many short jobs spread over several GPUs are easiest to run through the queue: put one
-command per line in a file and start one worker per GPU. One process per GPU -- two
-co-tenants on the same card are slower in total, not faster.
+then one worker per GPU. One process per GPU on purpose: two co-tenants on the same
+card measured about 13% slower in total throughput on this hardware, not faster.
 
 ```bash
 for g in 0 1 2 3; do bash experiments/queue_worker.sh $g brax/logs/queue/jobs.txt & done
 ```
+
+`analysis/pick_reacher_lr.py` and `analysis/pick_pusher_lr.py` apply the selection rule
+of App. C.1 to the tuning logs, so the chosen learning rate is read off the data rather
+than by eye. The selected values are in Tab. 2 and are what `lr_for` and each config's
+`remax_ac:` block carry.
+
+The appendix diagnostics are the `diag_*` scripts; see `experiments/README.md`.
 
 #### A note on Reacher, and on Pusher
 `brax/configs/brax/reacher.yaml` used to set `env_params.episode_length` for `sac:` and

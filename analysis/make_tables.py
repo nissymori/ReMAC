@@ -62,8 +62,7 @@ def humanoid_epsilon():
     d = pd.read_pickle(MAIN)
     d["env_s"] = d["env"].str.replace("brax/", "", regex=False)
     h = d[d.env_s == "humanoidstandup"]
-    # HumanoidStandup was originally run at eps in {1e-8, 1e-1, 1}; the missing 1e-2
-    # arm was added for the camera-ready version, so include it once it is present.
+    # Include whichever epsilons the data actually carries.
     epss = [e for e in (1e-8, 1e-2, 1e-1, 1.0)
             if np.isclose(h["actor_epsilon"].dropna().to_numpy()[:, None], e,
                           atol=0).any()]

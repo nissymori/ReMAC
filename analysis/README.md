@@ -27,7 +27,7 @@ n = 10.
 | `make_diagnostic_figs.py` | Fig. 18, and the figure form of the diagnostic tables. |
 | `make_humanoid_figs.py` | HumanoidStandup on its own, in the same visual language. |
 | `make_tables.py` | The LaTeX bodies of Tabs. 4, 6, 7, 8, 9 -- printed from the data rather than transcribed. |
-| `parse_brax_logs.py` | Turns stdout run logs into rows of the frame's schema, and merges them into it. Needed because the runs added for the camera-ready version were logged to files, not wandb. |
+| `parse_brax_logs.py` | Turns stdout run logs into rows of the frame's schema, and merges them into it. Needed because some runs were logged to files rather than to wandb. |
 | `parse_sigma_logs.py` | Tab. 7's scale-gradient rows, from `brax/logs/sigma_m8/runs/`. |
 | `pick_reacher_lr.py`, `pick_pusher_lr.py` | Apply the paper's learning-rate selection rule (App. C.1) to a tuning sweep's logs. |
 
@@ -58,7 +58,7 @@ New runs are logged to files (see `experiments/lib_runlog.sh`); fold them into t
 ```bash
 python analysis/parse_brax_logs.py \
     --base data/brax-remax-ac-report.pkl.gz \
-    --out  data/brax-remax-ac-camera-ready.pkl.gz \
+    --out  data/brax-remax-ac-merged.pkl.gz \
     --logs 'brax/logs/pusher/*.log' 'brax/logs/humanoid_eps/*.log'
 ```
 

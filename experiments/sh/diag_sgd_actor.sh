@@ -52,19 +52,20 @@ export MPLBACKEND=Agg
 # --- common settings ---
 total_timesteps=3000000
 eval_freq=30000
-num_seeds=2                 # num_seeds=10 OOMs; split into 5 runs of 2 seeds
-seed_ids="2 3 4 5 6"        # seed_id 0,1 were used for tuning -> start at 2
+# The 10-seed split is per environment (seeds_for in experiments/lib_runlog.sh).
 remax_num_samples=16
 envs="halfcheetah ant hopper"
 adam_eps_sweep="1e-8 1e-2 1e-1 1 10 100"
 wandb_project="remac-sgd-report"
 
-if [ -n "$SEED_OVERRIDE" ]; then seed_ids="$SEED_OVERRIDE"; fi
+source "$(dirname "$0")/../lib_runlog.sh"
 
 run_remac_sgd () {
   local m="$1"
-  for seed in $seed_ids; do
-    for env in $envs; do
+  for env in $envs; do
+    read -r num_seeds seed_ids <<< "$(seeds_for "$env")"
+    [ -n "$SEED_OVERRIDE" ] && seed_ids="$SEED_OVERRIDE"
+    for seed in $seed_ids; do
       echo ">>> [sgd] remac SGD m=$m env=$env seed_id=$seed gpu=$GPU"
       python train.py --config configs/brax/$env.yaml --algorithm remax_ac \
         --num-seeds=$num_seeds --seed_id=$seed \
@@ -81,8 +82,10 @@ run_remac_sgd () {
 run_remac_adam () {
   local m="$1"
   for eps in $adam_eps_sweep; do
-    for seed in $seed_ids; do
-      for env in $envs; do
+    for env in $envs; do
+      read -r num_seeds seed_ids <<< "$(seeds_for "$env")"
+      [ -n "$SEED_OVERRIDE" ] && seed_ids="$SEED_OVERRIDE"
+      for seed in $seed_ids; do
         echo ">>> [sgd] remac Adam eps=$eps m=$m env=$env seed_id=$seed gpu=$GPU"
         python train.py --config configs/brax/$env.yaml --algorithm remax_ac \
           --num-seeds=$num_seeds --seed_id=$seed \
@@ -98,8 +101,10 @@ run_remac_adam () {
 }
 
 run_sac () {
-  for seed in $seed_ids; do
-    for env in $envs; do
+  for env in $envs; do
+    read -r num_seeds seed_ids <<< "$(seeds_for "$env")"
+    [ -n "$SEED_OVERRIDE" ] && seed_ids="$SEED_OVERRIDE"
+    for seed in $seed_ids; do
       echo ">>> [sgd] sac env=$env seed_id=$seed gpu=$GPU"
       python train.py --config configs/brax/$env.yaml --algorithm sac \
         --num-seeds=$num_seeds --seed_id=$seed \

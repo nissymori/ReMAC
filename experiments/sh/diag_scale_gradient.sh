@@ -54,8 +54,8 @@ export MPLBACKEND=Agg
 
 total_timesteps=3000000
 eval_freq=30000
-num_seeds=2                 # num_seeds=10 OOMs on an 11 GB card; 5 x 2 = 10 seeds
-seed_ids="2 3 4 5 6"        # seed_id 0,1 were used for tuning
+# The 10-seed split is per environment (seeds_for in experiments/lib_runlog.sh), so
+# this covers pusher (one process of ten) and humanoidstandup (ten of one) too.
 remax_num_samples=16        # B = 16 for every M, as in the existing Tab. 7 runs
 
 # Metrics are read from stdout rather than wandb: `train_log_interval` defaults to the
@@ -69,21 +69,8 @@ RUNDIR="logs/sigma_m8/runs"
 # differs from the value the paper's results were produced with, so leaving it implicit would
 # make the new rows incomparable with the existing ones.  For the other environments the
 # config default already equals the Tab. 2 value and this is a no-op.
-lr_for () {
-  case "$1" in
-    halfcheetah)     echo 1e-4 ;;
-    ant)             echo 2e-4 ;;
-    hopper)          echo 3e-4 ;;
-    walker2d)        echo 1e-4 ;;
-    reacher)         echo 3e-4 ;;
-    swimmer)         echo 1e-4 ;;
-    humanoidstandup) echo 1e-4 ;;
-    *) echo "no tuned learning rate for env '$1'" >&2; exit 1 ;;
-  esac
-}
 
-if [ -n "$SEED_OVERRIDE" ]; then seed_ids="$SEED_OVERRIDE"; fi
-if [ -n "$NUM_SEEDS_OVERRIDE" ]; then num_seeds="$NUM_SEEDS_OVERRIDE"; fi
+source "$(dirname "$0")/../lib_runlog.sh"
 
 mkdir -p "$RUNDIR"
 
@@ -91,6 +78,9 @@ for job in $JOBS; do
   env="${job%%:*}"
   m="${job##*:}"
   lr=$(lr_for "$env") || exit 1
+  read -r num_seeds seed_ids <<< "$(seeds_for "$env")"
+  if [ -n "$SEED_OVERRIDE" ]; then seed_ids="$SEED_OVERRIDE"; fi
+  if [ -n "$NUM_SEEDS_OVERRIDE" ]; then num_seeds="$NUM_SEEDS_OVERRIDE"; fi
   for seed in $seed_ids; do
     out="$RUNDIR/remac_m${m}_${env}_seed${seed}.log"
     echo ">>> [sigma] remac m=$m env=$env lr=$lr seed_id=$seed gpu=$GPU -> $out"

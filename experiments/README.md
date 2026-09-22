@@ -1,13 +1,26 @@
 # Experiments
 
-Everything added after the paper was first released, kept out of `brax/` so that the
-published training code shows only its bug fixes.  Two kinds of thing live here: the
-sweeps that produced the reported numbers for the tasks added or re-run since
-(Pusher, Reacher after the `episode_length` fix, HumanoidStandup), and the appendix
-diagnostics, each of which probes a mechanism the analysis predicts or a stronger
-notion of exploration than policy stochasticity.
+Everything that runs an experiment, kept out of `brax/` so that the training code
+stands on its own.  Two kinds of thing live here: the sweeps that produced the reported
+numbers, and the appendix diagnostics, each of which probes a mechanism the analysis
+predicts or a stronger notion of exploration than policy stochasticity.
 
 Every script `cd`s into `brax/` itself, so it can be run from anywhere.
+
+| script | what it is |
+|---|---|
+| `sh/tune.sh <ENV> <GPU> "<M:LR> ..."` | the learning-rate sweep of App. C.1 |
+| `sh/final.sh <ENV> <GPU> "<TAG> ..."` | the reported runs at eps = 1e-8 |
+| `sh/eps.sh <ENV> <GPU> "<M:EPS> ..."` | the epsilon sweep |
+| `sh/make_queue.sh <PHASE>` | writes out the full matrix for a phase |
+| `sh/diag_*.sh` | the appendix diagnostics, below |
+| `lib_runlog.sh` | what differs per task: `lr_for`, `b_for_m`, `seeds_for` |
+| `queue_worker.sh` | one worker per GPU against a shared queue file |
+
+The three phases take the task as an argument rather than existing once per task: the
+procedure is the same everywhere, and the three numbers that are not -- the tuned
+learning rate, the action-sample batch size, and how the ten seeds are split across
+processes -- are looked up in `lib_runlog.sh`.
 
 Everything here is run from the **repository root**.
 

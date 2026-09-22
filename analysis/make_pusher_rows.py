@@ -1,8 +1,8 @@
 """Emit the Pusher rows of Tabs. 2, 7 and 8, straight from the run logs.
 
-Pusher is the eighth main task, added for the camera-ready version.  Its runs were
-logged to files rather than to wandb (see analysis/parse_brax_logs.py), so its table rows
-come from the logs instead of from the report pickle that analysis/make_tables.py reads.
+Pusher's runs were logged to files rather than to wandb (see analysis/parse_brax_logs.py),
+so its table rows come from the logs instead of from the report pickle that
+analysis/make_tables.py reads.
 The conventions are the ones stated in App. C.1 and reused here unchanged:
 
   * a *seed* is one training run; a configuration is n = 10 seeds, here 10 vmapped

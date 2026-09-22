@@ -15,9 +15,7 @@ fig/humanoidstandup.pdf                      return + entropy at Adam's default 
 fig/entropy_humanoidstandup_vary_eps.pdf     entropy, one panel per eps (matches Figs. 7-10)
 fig/return_humanoidstandup_vary_eps.pdf      return,  one panel per eps (matches Figs. 11-14)
 
-Note: HumanoidStandup was originally run at eps in {1e-8, 1e-1, 1} only.  The missing
-eps=1e-2 arm was added for the camera-ready version (experiments/sh/humanoid_eps.sh), so the
-sweep now covers all four values, as it does for every other task.
+The sweep covers all four epsilons, as it does for every other task.
 
 Run:  python analysis/make_humanoid_figs.py
 """
@@ -46,7 +44,7 @@ from make_eps_sweeps import (  # noqa: E402  (shared data handling: same pkl, sa
 )
 
 ENV = "humanoidstandup"
-# All four epsilons, since the eps=1e-2 arm was filled in for the camera-ready version.
+# All four epsilons, as for every other task.
 HUMANOID_EPSILONS = [1e-8, 1e-2, 1e-1, 1.0]
 
 

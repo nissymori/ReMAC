@@ -205,11 +205,11 @@ DEFAULT_ENV_LR: Dict[str, float] = {
     "brax/reacher": 3e-4,   # re-tuned after the episode_length fix (was 5e-4)
     "brax/swimmer": 1e-4,
     "brax/humanoidstandup": 1e-4,
-    "brax/pusher": 2e-4,       # tuned for the camera-ready version
+    "brax/pusher": 2e-4,
 }
 
 # Environment order of the paper's main grids: the six envs of Figs. 3-4 (2x3), and the
-# camera-ready eight (2x4), which appends humanoidstandup and pusher so that the first
+# eight (2x4), which appends humanoidstandup and pusher so that the first
 # six keep their panel positions.
 ENV_ORDER_6: Tuple[str, ...] = (
     "brax/ant",
@@ -762,7 +762,7 @@ def _legend_handles_m(
 
 
 # ============================================================
-# 1) envs in an nrows x ncols grid (the paper's 2x3, and the camera-ready 2x4)
+# 1) envs in an nrows x ncols grid (2x3 over six tasks, 2x4 over eight)
 # ============================================================
 def plot_envs_grid(
     df: pd.DataFrame,
