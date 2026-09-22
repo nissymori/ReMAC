@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ReMAC rebuttal experiment (4): state-space coverage.
+# State-space coverage (Tab. 9).
 # ReMAC m in {1,2,4} and SAC, on halfcheetah/ant/hopper, logging coverage/* .
 # wandb project: remac-coverage-report
 set -uo pipefail   # not -e: one failed run must not abort the whole sweep

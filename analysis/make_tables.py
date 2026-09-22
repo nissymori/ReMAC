@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 
 MAIN = os.environ.get("REMAC_DATA", "data/brax-remax-ac-report.pkl.gz")
-REB = "data/remac_rebuttal_data.pkl"
+REB = "data/diagnostics.pkl"
 ENVS = ["halfcheetah", "ant", "hopper"]
 PRETTY = {"halfcheetah": "HalfCheetah", "ant": "Ant", "hopper": "Hopper"}
 B_PER_M = {1: 8, 2: 8, 4: 8, 8: 16}
@@ -91,7 +91,7 @@ def humanoid_epsilon():
     print()
 
 
-# ---------------------------------------------------------------- rebuttal pickle
+# --------------------------------------------------------------- diagnostics frame
 def per_seed(runs, metric, *, late=True, frac=0.1):
     out = []
     for r in runs:

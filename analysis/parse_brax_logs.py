@@ -7,7 +7,7 @@ The wandb API key on this machine is no longer accepted, so the camera-ready run
 (Pusher, and HumanoidStandup's missing eps = 1e-2 arm) are launched with
 ``python -u`` into per-run log files instead, and this module converts those logs
 into rows of exactly that schema.  The merged frame is a drop-in replacement for
-the pickle, so plot.py, make_cxt2_figs.py and make_tables.py keep working unchanged.
+the pickle, so plot.py, make_eps_sweeps.py and make_tables.py keep working unchanged.
 
 Log format (written by brax/train.py plus experiments/lib_runlog.sh)
 ----------------------------------------------------------------
@@ -35,7 +35,7 @@ byte-for-byte as fetch_wandb_data_with_seeds() wrote it::
 
     ReMAC (M=4, eps=1e-08, lr=0.0001)        SAC (lr=0.000204951)
 
-``make_cxt2_figs.remac()`` filters on the columns instead, so both have to agree.
+``make_eps_sweeps.remac()`` filters on the columns instead, so both have to agree.
 
 Usage
 -----
