@@ -18,6 +18,13 @@ try:
 except ImportError:  # pragma: no cover - local algorithms can still run
     _get_rejax_algo = None
 
+# Registers the sparse-reward Reacher under the name "sparse_reacher", so a
+# config can select it with `env: brax/sparse_reacher`.
+try:
+    import sparse_reacher  # noqa: F401
+except ImportError:  # pragma: no cover - optional
+    pass
+
 
 def _resolve_local_algo(algo_str):
     local_algo_map = {
@@ -287,6 +294,8 @@ def _make_train_log_callback(
         critic_grad_norm,
         model_grad_norm,
         actor_update_norm=None,
+        policy_std=None,
+        sigma_grad=None,
     ):
         step_i = _step_to_int(step)
         seed_i = int(np.asarray(seed_idx))
@@ -300,6 +309,10 @@ def _make_train_log_callback(
         }
         if actor_update_norm is not None:
             train_metrics["train/actor_update_norm"] = actor_update_norm
+        if policy_std is not None:
+            train_metrics["train/policy_std"] = policy_std
+        if sigma_grad is not None:
+            train_metrics["train/sigma_grad"] = sigma_grad
 
         message = (
             f"[{algo_name}] seed={seed_i} step={step_i} "
@@ -312,6 +325,10 @@ def _make_train_log_callback(
         )
         if actor_update_norm is not None:
             message += f" actor_update_norm={_metric_scalar(actor_update_norm):.6f}"
+        if policy_std is not None:
+            message += f" policy_std={_metric_scalar(policy_std):.6g}"
+        if sigma_grad is not None:
+            message += f" sigma_grad={_metric_scalar(sigma_grad):.6g}"
         print(message)
 
         if latest_train_metrics is not None:
@@ -381,7 +398,72 @@ def _attach_train_logger(
     return algo.replace(**replace_kwargs)
 
 
-def main(algo_str, config, seed_id, num_seeds, time_fit, wandb_run=None):
+
+def _make_eval_state_dumper(out_dir, run_tag):
+    """Writes one .npz per (seed, eval step) holding raw, subsampled eval states."""
+    import os
+
+    os.makedirs(out_dir, exist_ok=True)
+
+    def dump(global_step, seed_idx, obs):
+        path = os.path.join(
+            out_dir, f"{run_tag}_seed{int(seed_idx)}_step{int(global_step)}.npz"
+        )
+        np.savez_compressed(path, obs=np.asarray(obs, dtype=np.float32))
+
+    return dump
+
+
+def _attach_eval_state_collector(algo, eval_callback, cfg):
+    """Wraps ``eval_callback`` so the last ``cfg['frac']`` of training also dumps
+    the raw observations visited by the eval policy.
+
+    Raw (un-normalized) observations are stored because the k-NN entropy estimate
+    must use one normalization per environment, shared by every method and seed.
+    """
+    from state_entropy import collect_eval_states
+
+    dump = _make_eval_state_dumper(cfg["out_dir"], cfg["run_tag"])
+    keep = int(cfg["keep"])
+    num_envs = int(cfg["num_envs"])
+    start_step = int((1.0 - float(cfg["frac"])) * int(algo.total_timesteps))
+    max_steps = int(algo.env_params.max_steps_in_episode)
+
+    def wrapped(algo_, ts, rng):
+        out = eval_callback(algo_, ts, rng)
+
+        rng_roll, rng_sub = jax.random.split(jax.random.fold_in(rng, 12345))
+        obs, valid = collect_eval_states(
+            algo_.make_act(ts), rng_roll, algo_.env, algo_.env_params,
+            num_envs=num_envs, max_steps=max_steps,
+        )
+        obs = obs.reshape(-1, obs.shape[-1])
+        valid = valid.reshape(-1)
+
+        # Gumbel top-k: a fixed-size uniform subsample of the valid states,
+        # without replacement, with a seed fixed by rng_sub.
+        g = jax.random.gumbel(rng_sub, valid.shape)
+        scores = jnp.where(valid, g, -jnp.inf)
+        idx = jnp.argsort(-scores)[:keep]
+        sub = obs[idx]
+
+        def maybe_dump(step, seed_idx, sub_obs, n_valid):
+            if int(step) >= start_step and int(n_valid) >= keep:
+                dump(step, seed_idx, sub_obs)
+
+        jax.debug.callback(
+            maybe_dump,
+            ts.global_step,
+            jax.lax.axis_index("seed"),
+            sub,
+            jnp.sum(valid),
+        )
+        return out
+
+    return wrapped
+
+
+def main(algo_str, config, seed_id, num_seeds, time_fit, wandb_run=None, eval_states_cfg=None):
     config = dict(config)
     train_log_interval = config.pop("train_log_interval", config.pop("log_interval", None))
     latest_train_metrics = {}
@@ -424,6 +506,9 @@ def main(algo_str, config, seed_id, num_seeds, time_fit, wandb_run=None):
         )
         jax.debug.callback(eval_log_callback, ts.global_step, seed_idx, mean_length, mean_return)
         return lengths, returns
+
+    if eval_states_cfg is not None:
+        eval_callback = _attach_eval_state_collector(algo, eval_callback, eval_states_cfg)
 
     algo = algo.replace(eval_callback=eval_callback)
 
@@ -524,6 +609,19 @@ if __name__ == "__main__":
         default=None,
         help="Optional Weights & Biases run name.",
     )
+    parser.add_argument(
+        "--collect-eval-states",
+        action="store_true",
+        help="Dump the raw observations visited by the eval policy (for the k-NN "
+             "visited-state entropy), over the last --eval-states-frac of training.",
+    )
+    parser.add_argument("--eval-states-dir", type=str, default="eval_states")
+    parser.add_argument("--eval-states-num-envs", type=int, default=64)
+    parser.add_argument("--eval-states-keep", type=int, default=4000,
+                        help="States kept per (seed, evaluation); this is the N of the estimator.")
+    parser.add_argument("--eval-states-frac", type=float, default=0.1,
+                        help="Trailing fraction of training over which states are dumped "
+                             "(matches the final-value rule of App. C.1).")
 
     args = parser.parse_args()
     config = load_algorithm_config(args.config, args.algorithm)
@@ -546,6 +644,16 @@ if __name__ == "__main__":
         config=wandb_config,
     )
 
+    eval_states_cfg = None
+    if args.collect_eval_states:
+        eval_states_cfg = {
+            "out_dir": args.eval_states_dir,
+            "run_tag": args.wandb_run_name or f"{args.algorithm}_{args.seed_id}",
+            "num_envs": args.eval_states_num_envs,
+            "keep": args.eval_states_keep,
+            "frac": args.eval_states_frac,
+        }
+
     main(
         args.algorithm,
         config,
@@ -553,4 +661,5 @@ if __name__ == "__main__":
         args.num_seeds,
         args.time_fit,
         wandb_run,
+        eval_states_cfg=eval_states_cfg,
     )

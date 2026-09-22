@@ -11,6 +11,8 @@ _METRIC_KEYS = (
     "critic_grad_norm",
     "model_grad_norm",
     "actor_update_norm",
+    "policy_std",
+    "sigma_grad",
 )
 
 
@@ -41,8 +43,13 @@ def make_train_metrics(
     actor_grad_norm,
     critic_grad_norm,
     actor_update_norm=0.0,
+    policy_std=0.0,
+    sigma_grad=0.0,
 ):
-    actor_update_norm = jnp.asarray(actor_update_norm, dtype=actor_grad_norm.dtype)
+    dt = actor_grad_norm.dtype
+    actor_update_norm = jnp.asarray(actor_update_norm, dtype=dt)
+    policy_std = jnp.asarray(policy_std, dtype=dt)
+    sigma_grad = jnp.asarray(sigma_grad, dtype=dt)
     model_grad_norm = jnp.sqrt(actor_grad_norm**2 + critic_grad_norm**2)
     return {
         "actor_loss": actor_loss,
@@ -52,6 +59,8 @@ def make_train_metrics(
         "critic_grad_norm": critic_grad_norm,
         "model_grad_norm": model_grad_norm,
         "actor_update_norm": actor_update_norm,
+        "policy_std": policy_std,
+        "sigma_grad": sigma_grad,
     }
 
 
@@ -91,6 +100,8 @@ def maybe_log_train_metrics(callback, interval, step, is_training, metrics, seed
                 metrics["critic_grad_norm"],
                 metrics["model_grad_norm"],
                 metrics["actor_update_norm"],
+                metrics["policy_std"],
+                metrics["sigma_grad"],
             )
         else:
             jax.debug.callback(

@@ -1,13 +1,24 @@
-# tuned
+# Sparse-reward Reacher.
+#
+# Identical to configs/brax/reacher.yaml except:
+#   (1) env: brax/sparse_reacher   -- reward replaced by r_t = 1{d_t < 0.05}
+#       (JaxGCRL convention); physics, observations and termination unchanged.
+#   (2) env_params.episode_length is set explicitly for EVERY algorithm.
+#       In reacher.yaml it was set for sac/ppo (50) but omitted for remax_ac,
+#       which therefore silently used Brax's default of 1000 -- a 20x longer
+#       episode, making the SAC-vs-ReMAC return comparison invalid.
+#
+# All other hyperparameters are copied verbatim from reacher.yaml.
+
 sac:
-  env: brax/reacher
+  env: brax/sparse_reacher
   env_params:
     episode_length: 50
   agent_kwargs:
     activation: tanh
   num_envs: 128
-  buffer_size: 1_000_000
-  fill_buffer: 10_000
+  buffer_size: 1000000
+  fill_buffer: 10000
   batch_size: 512
   learning_rate: 0.0004617429169256732
   num_epochs: 128
@@ -18,21 +29,15 @@ sac:
   target_entropy_ratio: 0
   normalize_observations: true
 
-
 remax_ac:
-  env: brax/reacher
-  # FIX: this block previously omitted env_params, so remax_ac silently used
-  # Brax's default episode_length=1000 while sac/ppo used 50 -- a 20x longer
-  # episode, which made the SAC-vs-ReMAC return comparison on Reacher invalid.
-  env_params:
-    episode_length: 50
+  env: brax/sparse_reacher
   agent_kwargs:
     activation: tanh
   num_envs: 128
-  buffer_size: 1_000_000
-  fill_buffer: 10_000
+  buffer_size: 1000000
+  fill_buffer: 10000
   batch_size: 512
-  learning_rate: 0.0003   # re-tuned for ReMAC after the episode_length fix (Tab. 2; was 5e-4)
+  learning_rate: 0.0005
   num_epochs: 128
   total_timesteps: 5242880
   eval_freq: 32768
@@ -43,11 +48,12 @@ remax_ac:
   remax_num_samples: 16
   remax_m: 4
   actor_epsilon: 1e-8
-  soft_critic: false  
+  soft_critic: false
+  env_params:
+    episode_length: 50
 
-# tuned
 ppo:
-  env: brax/reacher
+  env: brax/sparse_reacher
   env_params:
     episode_length: 50
   agent_kwargs:

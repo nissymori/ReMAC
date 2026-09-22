@@ -25,7 +25,7 @@ remax_ac:
   buffer_size: 1048576
   fill_buffer: 8192
   batch_size: 256
-  learning_rate: 0.00020366442026830908
+  learning_rate: 0.0001   # tuned for ReMAC (Tab. 2); rejax's SAC value was 2.0366e-4
   num_epochs: 128
   total_timesteps: 5242880
   eval_freq: 32768

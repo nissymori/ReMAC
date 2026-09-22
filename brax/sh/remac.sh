@@ -1,3 +1,12 @@
+#!/usr/bin/env bash
+# ReMAC on the main tasks, at every Adam epsilon, plus the learning-rate probes.
+#
+# NOTE on Reacher and Pusher.  The Reacher lines below are superseded: remax_ac
+# silently trained on 1000-step episodes there until configs/brax/reacher.yaml was
+# fixed, so Reacher was re-tuned and re-run with sh/reacher_{tune,final,eps}.sh, and
+# those are the runs the paper reports.  Pusher was added for the camera-ready
+# version and has its own phase scripts, sh/pusher_{tune,final,eps,sigma_sgd}.sh.
+#
 export CUDA_VISIBLE_DEVICES=0
 total_timesteps=3000000
 eval_freq=30000
@@ -19,6 +28,18 @@ for m in 1 2 4 8; do
         python train.py --config configs/brax/swimmer.yaml --algorithm remax_ac --num-seeds=$num_seeds --set remax_m=$m  --set actor_epsilon=$actor_epsilon --set total_timesteps=$total_timesteps --set eval_freq=$eval_freq --wandb --set remax_num_samples=$remax_num_samples --wandb-project=$wandb_project --seed_id=$seed
         python train.py --config configs/brax/halfcheetah.yaml --algorithm remax_ac --num-seeds=$num_seeds --set remax_m=$m  --set actor_epsilon=$actor_epsilon --set total_timesteps=$total_timesteps --set eval_freq=$eval_freq --wandb --set remax_num_samples=$remax_num_samples --wandb-project=$wandb_project --seed_id=$seed
         python train.py --config configs/brax/walker2d.yaml --algorithm remax_ac --num-seeds=$num_seeds --set remax_m=$m  --set actor_epsilon=$actor_epsilon --set total_timesteps=$total_timesteps --set eval_freq=$eval_freq --wandb --set remax_num_samples=$remax_num_samples --wandb-project=$wandb_project --seed_id=$seed
+    done
+done
+
+### Additional for humanoidstandup
+for m in 1 2 4 8; do
+    if [ "$m" -eq 8 ]; then
+      remax_num_samples=16
+    else
+      remax_num_samples=8
+    fi
+    for actor_epsilon in 1e-8 1 1e-1; do
+        python train.py --config configs/brax/humanoidstandup.yaml --algorithm remax_ac --num-seeds=$num_seeds --set remax_m=$m  --set actor_epsilon=$actor_epsilon --set total_timesteps=$total_timesteps --set eval_freq=$eval_freq --wandb --set remax_num_samples=$remax_num_samples --wandb-project=$wandb_project --seed_id=$seed
     done
 done
 

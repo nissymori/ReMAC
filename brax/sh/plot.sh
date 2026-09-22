@@ -1,127 +1,86 @@
 #!/usr/bin/env bash
-# Regenerates the plots from docs/continuous_remax_tmlr2026.pdf using plot.py,
-# with the changes requested on 2026-05-22:
+# Regenerates every Brax figure in the paper, into fig/.
 #
-#   - Main figures (Fig 3 & 4): per-m B selection m in {1,2,4} -> B=8, m=8 -> B=16
-#     (the original design), instead of pooling B=8+B=16 as the unfiltered code did.
-#   - Baselines: SAC only.  PPO and TD3 are excluded (--no-other-baselines).
-#   - NEW: B (=remax_num_samples) ablation, B=8 vs B=16 per m.
-#   - NEW: combined lr sweep with eps=1 (lr raised) and eps=1e-8 (lr lowered).
-#     Curves are coloured by eps family (eps=1 -> reds, eps=1e-8 -> blues, lr by
-#     shade) and the lr legend is split into two eps tiers (eps=1 on top).
-#     Produced both per-env (lr-sweep-grid, return+entropy in one figure) and as
-#     a 3-env side-by-side figure with a shared legend (lr-sweep-grid-multi),
-#     which writes return and entropy as SEPARATE figures.
-#   - NEW: a MAIN return figure with SAC + PPO baselines (TD3 still excluded).
+# Reads data/brax-remax-ac-report.pkl.gz, so it needs no wandb access.  A single
+# frame is shared by every plot below, so it is loaded once per invocation of
+# analysis/plot.py and never re-fetched.
 #
-# Note: the appendix per-M eps sweeps keep m=8 at B=16, because the eps != 1e-8
-# runs for m=8 only exist at B=16 (so all four eps stay on the same B within a
-# figure).  Only the *main* cross-m figure switches m=8 to B=8.
+# Design decisions encoded here:
+#   - Main figures (Figs. 3 & 4): the eight main tasks in a 2x4 grid, with the
+#     per-M action-sample batch size the paper uses -- B = 8 for M in {1,2,4} and
+#     B = 16 for M = 8, where the estimator is noisiest.  Fig. 3 carries the SAC
+#     and PPO baselines, Fig. 4 SAC only (PPO logs no policy entropy).
+#   - The appendix per-M epsilon sweeps (Figs. 7-14) come from
+#     analysis/make_cxt2_figs.py, which overlays M in {1,2,4,8} in each panel.
+#     They keep M = 8 at B = 16, because the eps != 1e-8 runs for M = 8 only exist
+#     at B = 16, so every curve in a figure stays on one B.
+#   - The lr sweeps (Figs. 15 & 16) cover the three tasks whose tuned lr is 1e-4,
+#     which makes the lr-vs-epsilon comparison readable.
+#   - The B ablation (Fig. 17) is per-task, B = 8 vs B = 16 at each M.
 #
-# Toy-experiment figures (PDF Fig 1, 2, 5) are not produced here — they come
-# from the toy/ scripts, not from wandb data.
+# The toy figures (Figs. 1, 2, 5, 6) come from toy/ and additional_experiments/,
+# not from here.
 #
-# Outputs land in brax/fig/.  A single pickle cache is shared across every plot
-# so the wandb fetch only runs once.
-
+# Usage:  bash brax/sh/plot.sh
 set -euo pipefail
 
-cd "$(dirname "$0")/.."   # brax/
+cd "$(dirname "$0")/../.."        # repository root
 
-PROJECT="brax-remax-ac-report"
-CACHE="cache/${PROJECT}.pkl"
+CACHE="data/brax-remax-ac-report.pkl.gz"
 OUT_DIR="fig"
-COMMON="--project ${PROJECT} --cache ${CACHE} --out-dir ${OUT_DIR}"
+COMMON="--project brax-remax-ac-report --cache ${CACHE} --out-dir ${OUT_DIR}"
+BS_PER_M="1:8,2:8,4:8,8:16"
 
-mkdir -p "$(dirname "${CACHE}")" "${OUT_DIR}"
-
-# ============================================================
-# Paper Fig 3 (return) & Fig 4 (entropy)  -- MAIN
-#   6 envs (2x3), m in {1,2,4,8}, eps=1e-8, default lr, SAC only.
-#   Per-m B selection (original design): m in {1,2,4} -> B=8, m=8 -> B=16.
-# ============================================================
-python plot.py 2x3 ${COMMON} \
-    --metrics eval/return,train/entropy \
-    --ms 1,2,4,8 --epsilons 1e-8 \
-    --bs-per-m 1:8,2:8,4:8,8:16 \
-    --include-sac --no-other-baselines
+mkdir -p "${OUT_DIR}"
+[ -f "${CACHE}" ] || { echo "missing ${CACHE}" >&2; exit 1; }
 
 # ============================================================
-# MAIN return with SAC + PPO baselines (return only, main only).
-#   Same ReMAC selection as above; baselines = SAC and PPO (TD3 excluded).
+# Figs. 3 and 4 -- MAIN, eight tasks in a 2x4 grid, eps = 1e-8, tuned lr.
+#   Fig. 3: return, with the SAC and PPO baselines.
+#   Fig. 4: policy entropy, with SAC only.
 # ============================================================
-python plot.py 2x3 ${COMMON} \
+python analysis/plot.py 2x4 ${COMMON} \
     --metrics eval/return \
-    --ms 1,2,4,8 --epsilons 1e-8 \
-    --bs-per-m 1:8,2:8,4:8,8:16 \
+    --ms 1,2,4,8 --epsilons 1e-8 --bs-per-m ${BS_PER_M} \
     --include-sac --baselines SAC,PPO
 
-# ============================================================
-# Paper Fig 6-9 (entropy) & Fig 10-13 (return) -- APPENDIX
-#   per-M eps sweep: 6 envs (2x3), fixed m, eps in {1e-8,1e-2,1e-1,1.0},
-#   default lr, SAC only.
-#     m in {1,2,4}: B=8.   m=8: B=16 (eps != 1e-8 only exist at B=16).
-# ============================================================
-for m in 1 2 4; do
-    python plot.py 2x3 ${COMMON} \
-        --metrics train/entropy,eval/return \
-        --ms "${m}" --epsilons 1e-8,1e-2,1e-1,1 \
-        --bs 8 \
-        --include-sac --no-other-baselines --include-eps-label
-done
+python analysis/plot.py 2x4 ${COMMON} \
+    --metrics train/entropy \
+    --ms 1,2,4,8 --epsilons 1e-8 --bs-per-m ${BS_PER_M} \
+    --include-sac --no-other-baselines
 
-python plot.py 2x3 ${COMMON} \
-    --metrics train/entropy,eval/return \
-    --ms 8 --epsilons 1e-8,1e-2,1e-1,1 \
-    --bs 16 \
-    --include-sac --no-other-baselines --include-eps-label
+# analysis/plot.py names its output after the settings that produced it; the paper
+# includes two of them under short names.  Copying rather than renaming keeps the
+# settings-named file around, so it stays obvious which run of this script a figure
+# in fig/ came from.
+cp "${OUT_DIR}/paper_2x4_bsPerM1.8-2.8-4.8-8.16_sacT_baseSAC-PPO_dfltlrT_return_m[1, 2, 4, 8]_eps[1e-08].pdf" \
+   "${OUT_DIR}/main_result_return.pdf"
+cp "${OUT_DIR}/paper_2x4_bsPerM1.8-2.8-4.8-8.16_sacT_dfltlrT_entropy_m[1, 2, 4, 8]_eps[1e-08].pdf" \
+   "${OUT_DIR}/full_entropy.pdf"
 
 # ============================================================
-# Paper Fig 14
-#   lr sweep at m=4, eps=1.0 for halfcheetah / swimmer / walker2d
-#   (return + entropy, single env).  Default lr is included so the red
-#   reference line (max return / min entropy at default lr, eps=1e-8) lines up.
+# Figs. 7-14 -- APPENDIX, the per-M epsilon sweeps, eight tasks in a 2x4 grid.
+#   entropy_vary_m_eps_{1em8,1em2,1em1,1}.pdf  and  return_vary_m_eps_*.pdf
 # ============================================================
-for env in halfcheetah swimmer walker2d; do
-    python plot.py lr-sweep ${COMMON} \
-        --env "${env}" --m 4 --epsilon 1.0 \
-        --lrs 1e-4,3e-4,5e-4,1e-3
-done
+python analysis/make_cxt2_figs.py
 
 # ============================================================
-# NEW (request 5): combined lr sweep, eps=1 (lr raised) on the top row and
-#   eps=1e-8 (lr lowered) on the bottom row, return + entropy together.
-#   m=4 is the only m with raised-lr runs at eps=1.  Each row only shows the
-#   lrs that exist for that eps (eps=1: 1e-4..1e-3; eps=1e-8: 1e-5..1e-4).
+# Figs. 15 and 16 -- the lr sweep at M = 4, eps = 1 (lr raised) over eps = 1e-8
+# (lr lowered), for the three tasks whose tuned lr is 1e-4.  Written as two
+# figures (return, entropy) sharing one epsilon-tiered legend.
 # ============================================================
-for env in halfcheetah swimmer walker2d; do
-    python plot.py lr-sweep-grid ${COMMON} \
-        --env "${env}" --m 4 \
-        --epsilons 1,1e-8 \
-        --lrs 1e-5,3e-5,5e-5,1e-4,3e-4,5e-4,1e-3
-done
-
-# Combined version: the three envs side by side in one figure with a single
-# shared (eps-tiered) legend.  (Per-env figures above are kept too.)
-python plot.py lr-sweep-grid-multi ${COMMON} \
+python analysis/plot.py lr-sweep-grid-multi ${COMMON} \
     --envs halfcheetah,swimmer,walker2d --m 4 \
     --epsilons 1,1e-8 \
     --lrs 1e-5,3e-5,5e-5,1e-4,3e-4,5e-4,1e-3
 
 # ============================================================
-# NEW (request 3): B (=remax_num_samples) ablation, B=8 vs B=16 per m.
-#   1 row x 4 cols (m in {1,2,4,8}), default lr, eps=1e-8, return + entropy.
+# Fig. 17 -- the B ablation, B = 8 vs B = 16 at each M, one figure per task.
 # ============================================================
 for env in ant halfcheetah hopper walker2d reacher swimmer; do
-    python plot.py b-ablation ${COMMON} \
-        --env "${env}" --epsilon 1e-8 \
-        --ms 1,2,4,8 --bs 8,16 \
+    python analysis/plot.py b-ablation ${COMMON} \
+        --env "${env}" --epsilon 1e-8 --ms 1,2,4,8 --bs 8,16 \
         --metric eval/return
-
-    python plot.py b-ablation ${COMMON} \
-        --env "${env}" --epsilon 1e-8 \
-        --ms 1,2,4,8 --bs 8,16 \
-        --metric train/entropy
 done
 
 echo "All plots written to ${OUT_DIR}/"
