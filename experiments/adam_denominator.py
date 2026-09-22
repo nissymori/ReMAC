@@ -1,9 +1,8 @@
-"""Isolating Adam's denominator on the ReMax toy problem (rebuttal, Reviewer 22h8).
+"""Isolating Adam's denominator on the ReMax toy problem (Tab. 1, Fig. 6).
 
-Reviewer 22h8 objects that sweeping Adam's numerical-stability constant eps does not
-isolate adaptive normalization, because the denominator is present for every eps.
-This script adds the ablation that does isolate it: EMA-only, i.e. Adam with the
-denominator deleted,
+Sweeping Adam's numerical-stability constant eps does not isolate adaptive
+normalization, because the denominator is present for every eps.  This is the
+ablation that does isolate it: EMA-only, i.e. Adam with the denominator deleted,
 
     theta_{t+1} = theta_t - alpha * m_hat_t                            (EMA-only)
     theta_{t+1} = theta_t - alpha * m_hat_t / (sqrt(v_hat_t) + eps)    (Adam)

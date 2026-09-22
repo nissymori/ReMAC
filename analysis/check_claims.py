@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from make_cxt2_figs import B_PER_M, DEFAULT_LR, ENV_ORDER, MS  # noqa: E402
+from make_eps_sweeps import B_PER_M, DEFAULT_LR, ENV_ORDER, MS  # noqa: E402
 
 DATA = os.environ.get("REMAC_DATA", "data/brax-remax-ac-report.pkl.gz")
 LAST_FRAC = 0.1

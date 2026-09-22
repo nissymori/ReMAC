@@ -18,7 +18,6 @@ Everything here is run from the **repository root**.
 | `experiments/sh/remac_sgd.sh` | Does ReMAC depend on Adam? Re-runs it with a plain-SGD actor, everything else held fixed. | Tab. 8 |
 | `experiments/sh/remac_state_coverage.sh` | Does ReMAC visit more of the state space than SAC, not just act more stochastically? | Tab. 9 |
 | `experiments/knn_state_entropy.py` | The $k$-nearest-neighbour estimator of the visited-state entropy used by the coverage experiment. | Tab. 9 |
-| `experiments/make_rebuttal_figs.py` | Draws the four figures these experiments produce. | Fig. 18 (and three figures not used in the paper) |
 
 ## Running them
 
@@ -37,12 +36,12 @@ bash experiments/sh/remac_state_coverage.sh --gpu 0 --m 4
 
 `remac_sigma_m8.sh` writes one log per process under `brax/logs/sigma_m8/runs/` and its
 metrics are read back with `python analysis/parse_sigma_logs.py`; the other two were run
-with wandb and their results are shipped as `data/remac_rebuttal_data.pkl`, which is
+with wandb and their results are shipped as `data/diagnostics.pkl`, which is
 self-describing:
 
 ```python
 import pickle
-d = pickle.load(open("data/remac_rebuttal_data.pkl", "rb"))
+d = pickle.load(open("data/diagnostics.pkl", "rb"))
 print(d["schema"])   # the pickle documents itself
 d["summary"]         # the reported numbers
 d["tidy"]            # one row per seed
@@ -54,7 +53,7 @@ d["runs"]            # raw learning curves
 ```bash
 python analysis/make_tables.py        # Tabs. 4, 6, 7, 8, 9 straight from the data
 python analysis/parse_sigma_logs.py   # Tab. 7's scale-gradient rows from the run logs
-python experiments/make_rebuttal_figs.py
+python analysis/make_diagnostic_figs.py   # the figure form of the same runs
 ```
 
 ## Seeds

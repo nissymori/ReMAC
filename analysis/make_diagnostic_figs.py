@@ -1,18 +1,19 @@
-"""Rebuttal figures for the TMLR ReMAC submission.
+"""The diagnostic figures, drawn from the diagnostics frame.
 
-Self-contained: reads data/remac_rebuttal_data.pkl and writes 4 PDFs to fig/.
+Self-contained: reads data/diagnostics.pkl and writes four PDFs to fig/.  Only the
+first is used in the paper; the others are the figure form of tables that report the
+same runs, kept because they show the whole curve rather than a final value.
 
-    python experiments/make_rebuttal_figs.py
+    fig/damping.pdf          gradient damping: ||g|| and ||dtheta|| against M   (Fig. 18)
+    fig/coverage.pdf         visited-state coverage, ReMAC (M=1,2,4) vs SAC     (cf. Tab. 9)
+    fig/sgd_actor.pdf        ReMAC with a plain-SGD actor vs the Adam actor     (cf. Tab. 8)
+    fig/scale_gradient.pdf   the scale gradient and the policy scale            (cf. Tab. 7)
 
-Figures
-    fig/rebuttal_coverage.pdf    state-space coverage, ReMAC (M=1,2,4) vs SAC   (reviewer Lak5)
-    fig/rebuttal_sgd.pdf         ReMAC with a plain-SGD actor vs the Adam actor (reviewer cxT2)
-    fig/rebuttal_damping.pdf     gradient damping: ||g|| and ||dtheta|| vs M     (reviewer cxT2)
-    fig/rebuttal_sigma_grad.pdf  entropy-increase effect: sigma_grad, policy_std (reviewer cxT2)
+Style follows plot.py (serif/Times, Type-42 fonts, mean +- s.e. shading, per-env
+subplot grid), except that the sequential colormap is replaced by the Okabe-Ito
+colourblind-safe palette with distinct line styles and markers.
 
-Style follows analysis/plot.py (serif/Times, Type-42 fonts, mean +- s.e. shading, per-env
-subplot grid), but the sequential colormap is replaced by the Okabe-Ito colorblind-safe
-palette with distinct line styles and markers (reviewer cxT2 asked for this).
+Run:  python analysis/make_diagnostic_figs.py
 """
 
 import os
@@ -23,10 +24,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
-PKL = os.path.join(HERE, "data", "remac_rebuttal_data.pkl")
-FIGDIR = os.path.join(ROOT, "fig")
+# Paths are relative to the repository root, as in every other script here, so this
+# is run as `python analysis/make_diagnostic_figs.py` from there.
+PKL = "data/diagnostics.pkl"
+FIGDIR = "fig"
 
 ENVS: Tuple[str, ...] = ("halfcheetah", "ant", "hopper")
 MS: Tuple[int, ...] = (1, 2, 4)
@@ -186,7 +187,7 @@ def fig_coverage(d: dict):
         fontsize=13, y=0.995,
     )
     fig.tight_layout(rect=(0, 0.035, 1, 0.965))
-    save(fig, "rebuttal_coverage.pdf")
+    save(fig, "coverage.pdf")
 
 
 # ================================================================ 2) SGD vs Adam
@@ -221,7 +222,7 @@ def fig_sgd(d: dict):
         fontsize=12, y=1.06,
     )
     fig.tight_layout()
-    save(fig, "rebuttal_sgd.pdf")
+    save(fig, "sgd_actor.pdf")
 
 
 # ================================================================ 3) damping
@@ -256,7 +257,7 @@ def fig_damping(d: dict):
     fig.legend(handles=handles, loc="lower center", ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.09))
     # No suptitle: the LaTeX caption carries the description.
     fig.tight_layout()
-    save(fig, "rebuttal_damping.pdf")
+    save(fig, "damping.pdf")
 
 
 # ================================================================ 4) sigma grad
@@ -341,7 +342,7 @@ def fig_sigma(d: dict):
         fontsize=12, y=0.995,
     )
     fig.tight_layout(rect=(0, 0.03, 1, 0.955))
-    save(fig, "rebuttal_sigma_grad.pdf")
+    save(fig, "scale_gradient.pdf")
 
 
 def main():

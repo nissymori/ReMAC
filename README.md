@@ -14,8 +14,8 @@ pip install -r requirements.txt
 brax/          ReMAC, SAC, PPO, TD3 on Brax, the environment configs, and the
                main sweeps (brax/sh/)
 toy/           the fixed-state toy problem of Sec. 3
-experiments/   the sweeps for the tasks added or re-run since the first release,
-               and the appendix diagnostics (own README)
+experiments/   the sweeps for the tasks added or re-run since the first
+               release, and the appendix diagnostics (own README)
 analysis/      everything that turns runs into the figures and tables (own README)
 data/          the data the figures are drawn from
 ```

@@ -2,7 +2,7 @@
 # Extend Tab. 7 (the scale gradient on Brax) to M=8 and to Walker2d.
 #
 # Tab. 7 currently covers M in {1,2,4} on halfcheetah/ant/hopper, which leaves the
-# reviewer's observation about M=8 unmeasured on the scale side.  This script adds
+# largest retry budget unmeasured on the scale side.  This script adds
 #
 #     halfcheetah, ant, hopper : M = 8
 #     walker2d                 : M = 1, 2, 4, 8

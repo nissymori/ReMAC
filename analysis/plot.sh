@@ -11,14 +11,14 @@
 #     B = 16 for M = 8, where the estimator is noisiest.  Fig. 3 carries the SAC
 #     and PPO baselines, Fig. 4 SAC only (PPO logs no policy entropy).
 #   - The appendix per-M epsilon sweeps (Figs. 7-14) come from
-#     analysis/make_cxt2_figs.py, which overlays M in {1,2,4,8} in each panel.
+#     analysis/make_eps_sweeps.py, which overlays M in {1,2,4,8} in each panel.
 #     They keep M = 8 at B = 16, because the eps != 1e-8 runs for M = 8 only exist
 #     at B = 16, so every curve in a figure stays on one B.
 #   - The lr sweeps (Figs. 15 & 16) cover the three tasks whose tuned lr is 1e-4,
 #     which makes the lr-vs-epsilon comparison readable.
 #   - The B ablation (Fig. 17) is per-task, B = 8 vs B = 16 at each M.
 #
-# The toy figures (Figs. 1, 2, 5, 6) come from toy/ and additional_experiments/,
+# The toy figures (Figs. 1, 2, 5, 6) come from toy/ and experiments/,
 # not from here.
 #
 # Usage:  bash analysis/plot.sh
@@ -62,7 +62,7 @@ cp "${OUT_DIR}/paper_2x4_bsPerM1.8-2.8-4.8-8.16_sacT_dfltlrT_entropy_m[1, 2, 4, 
 # Figs. 7-14 -- APPENDIX, the per-M epsilon sweeps, eight tasks in a 2x4 grid.
 #   entropy_vary_m_eps_{1em8,1em2,1em1,1}.pdf  and  return_vary_m_eps_*.pdf
 # ============================================================
-python analysis/make_cxt2_figs.py
+python analysis/make_eps_sweeps.py
 
 # ============================================================
 # Figs. 15 and 16 -- the lr sweep at M = 4, eps = 1 (lr raised) over eps = 1e-8
