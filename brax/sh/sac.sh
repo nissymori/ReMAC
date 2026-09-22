@@ -49,3 +49,4 @@ python train.py --config configs/brax/walker2d.yaml --algorithm sac --num-seeds=
 python train.py --config configs/brax/halfcheetah.yaml --algorithm sac --num-seeds=$num_seeds --set total_timesteps=$total_timesteps --set eval_freq=$eval_freq --wandb --set wandb-project=$wandb_project --seed_id=$seed
 python train.py --config configs/brax/reacher.yaml --algorithm sac --num-seeds=$num_seeds --set total_timesteps=$total_timesteps --set eval_freq=$eval_freq --wandb --set wandb-project=$wandb_project --seed_id=$seed
 python train.py --config configs/brax/swimmer.yaml --algorithm sac --num-seeds=$num_seeds --set total_timesteps=$total_timesteps --set eval_freq=$eval_freq --wandb --set wandb-project=$wandb_project --seed_id=$seed
+python train.py --config configs/brax/humanoidstandup.yaml --algorithm sac --num-seeds=$num_seeds --set total_timesteps=$total_timesteps --set eval_freq=$eval_freq --wandb --set wandb-project=$wandb_project --seed_id=$seed
