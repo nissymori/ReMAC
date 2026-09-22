@@ -61,6 +61,8 @@ class ReMaxAC(
     remax_num_samples: int = struct.field(pytree_node=False, default=16)
     remax_m: int = struct.field(pytree_node=False, default=4)
     actor_epsilon: float = struct.field(pytree_node=False, default=1e-8)
+    actor_optimizer: str = struct.field(pytree_node=False, default="adam")
+    actor_momentum: float = struct.field(pytree_node=False, default=0.0)
     soft_critic: bool = struct.field(pytree_node=False, default=False)
     train_log_interval: int = struct.field(pytree_node=False, default=0)
     train_log_callback: callable = struct.field(pytree_node=False, default=None)
@@ -132,9 +134,22 @@ class ReMaxAC(
                 rng_critic, obs_ph, act_ph
             )
 
+        if self.actor_optimizer == "adam":
+            actor_opt = optax.adam(
+                learning_rate=self.learning_rate, eps=float(self.actor_epsilon)
+            )
+        elif self.actor_optimizer == "sgd":
+            actor_opt = optax.sgd(
+                learning_rate=self.learning_rate, momentum=float(self.actor_momentum)
+            )
+        else:
+            raise ValueError(
+                f"Unknown actor_optimizer '{self.actor_optimizer}'. "
+                "Expected 'adam' or 'sgd'."
+            )
         actor_tx = optax.chain(
             optax.clip(self.max_grad_norm),
-            optax.adam(learning_rate=self.learning_rate, eps=float(self.actor_epsilon)),
+            actor_opt,
         )
         actor_ts = TrainState.create(apply_fn=(), params=actor_params, tx=actor_tx)
         critic_tx = optax.chain(
@@ -287,6 +302,32 @@ class ReMaxAC(
         )
         return ts, minibatch
 
+    def _sigma_diagnostics(self, actor_params, grads, mb):
+        """Diagnostics for the entropy-increase-via-sigma effect.
+
+        Returns (policy_std, sigma_grad):
+          * policy_std -- mean pre-squash Gaussian std of the policy over the
+            minibatch.
+          * sigma_grad -- mean gradient of the actor loss wrt the
+            ``action_log_std`` Dense bias. Since ``loss = -objective``, a
+            negative value means minimizing the loss pushes ``log sigma`` (hence
+            sigma) up.
+        """
+        zero = jnp.array(0.0, dtype=jnp.float32)
+        if self.discrete:
+            return zero, zero
+
+        dist = self.actor.apply(actor_params, mb.obs, method="_action_dist")
+        policy_std = jnp.mean(dist.stddev())
+
+        sigma_grad = zero
+        for path, leaf in jax.tree_util.tree_leaves_with_path(grads):
+            key_str = jax.tree_util.keystr(path)
+            if "action_log_std" in key_str and "bias" in key_str:
+                sigma_grad = jnp.mean(leaf)
+                break
+        return policy_std, sigma_grad
+
     def update_actor(self, ts, mb):
         rng, action_rng = jax.random.split(ts.rng)
         ts = ts.replace(rng=rng)
@@ -333,12 +374,17 @@ class ReMaxAC(
             lambda new, old: new - old, actor_ts.params, prev_actor_params
         )
         actor_update_norm = optax.global_norm(actor_update)
+        policy_std, sigma_grad = self._sigma_diagnostics(
+            prev_actor_params, grads, mb
+        )
         ts = ts.replace(actor_ts=actor_ts)
         metrics = {
             "actor_loss": actor_loss,
             "entropy": entropy,
             "actor_grad_norm": actor_grad_norm,
             "actor_update_norm": actor_update_norm,
+            "policy_std": policy_std,
+            "sigma_grad": sigma_grad,
         }
         return ts, logprob, metrics
 
@@ -402,5 +448,7 @@ class ReMaxAC(
             actor_grad_norm=actor_metrics["actor_grad_norm"],
             critic_grad_norm=critic_metrics["critic_grad_norm"],
             actor_update_norm=actor_metrics["actor_update_norm"],
+            policy_std=actor_metrics["policy_std"],
+            sigma_grad=actor_metrics["sigma_grad"],
         )
         return ts, metrics
