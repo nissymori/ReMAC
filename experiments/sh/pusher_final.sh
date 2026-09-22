@@ -14,8 +14,8 @@
 #   -> logs/pusher/final_<TAG>.log
 set -uo pipefail   # not -e: one failed run must not abort the sweep
 
-cd "$(dirname "$0")/.."   # brax/
-source sh/lib_runlog.sh
+cd "$(dirname "$0")/../../brax"   # every path below is relative to brax/
+source "$(dirname "$0")/../lib_runlog.sh"
 
 GPU=$1
 TAGS=$2

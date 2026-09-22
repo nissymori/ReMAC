@@ -11,6 +11,10 @@
 # Usage:  bash sh/reacher_tune.sh <M> <GPU_ID>
 set -euo pipefail
 
+# Run from anywhere: every path below is relative to brax/.
+cd "$(dirname "$0")/../../brax"
+
+
 m=$1
 GPU=$2
 

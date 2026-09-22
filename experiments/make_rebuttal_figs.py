@@ -2,7 +2,7 @@
 
 Self-contained: reads data/remac_rebuttal_data.pkl and writes 4 PDFs to fig/.
 
-    python additional_experiments/make_rebuttal_figs.py
+    python experiments/make_rebuttal_figs.py
 
 Figures
     fig/rebuttal_coverage.pdf    state-space coverage, ReMAC (M=1,2,4) vs SAC   (reviewer Lak5)

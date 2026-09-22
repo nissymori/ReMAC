@@ -6,10 +6,10 @@
 #
 # Every job line is a shell command; $GPU is exported so the job can use it.
 #
-# Usage:  bash sh/queue_worker.sh <GPU_ID> <QUEUE_FILE>
+# Usage:  bash experiments/queue_worker.sh <GPU_ID> <QUEUE_FILE>
 set -uo pipefail
 
-cd "$(dirname "$0")/.."   # brax/
+cd "$(dirname "$0")/.."   # repository root
 
 GPU=$1
 QUEUE=$2

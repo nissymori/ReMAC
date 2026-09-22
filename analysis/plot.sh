@@ -21,10 +21,10 @@
 # The toy figures (Figs. 1, 2, 5, 6) come from toy/ and additional_experiments/,
 # not from here.
 #
-# Usage:  bash brax/sh/plot.sh
+# Usage:  bash analysis/plot.sh
 set -euo pipefail
 
-cd "$(dirname "$0")/../.."        # repository root
+cd "$(dirname "$0")/.."           # repository root
 
 CACHE="data/brax-remax-ac-report.pkl.gz"
 OUT_DIR="fig"

@@ -3,9 +3,9 @@
 #
 # The appendix plots the M sweep at every eps in {1e-8, 1e-2, 1e-1, 1} for every
 # main task.  HumanoidStandup was run at eps in {1e-8, 1e-1, 1} only (see
-# sh/humanoid_remac.sh), so its eps = 1e-2 panel is missing; this script fills it.
+# experiments/sh/humanoid_remac.sh), so its eps = 1e-2 panel is missing; this script fills it.
 #
-# Protocol matches sh/humanoid_remac.sh in everything that affects training:
+# Protocol matches experiments/sh/humanoid_remac.sh in everything that affects training:
 # lr = 1e-4 (Tab. 2), B = 16 if M = 8 else 8, 3M steps, eval every 30k, 10 seeds.
 # The 10 seeds are 10 processes of ONE vmapped seed each (seed_id 2..11), not
 # 5 x 2: HumanoidStandup (d = 17, obs = 376) does not fit 2 vmapped seeds with
@@ -16,8 +16,8 @@
 #   -> logs/humanoid_eps/remac_m<M>_humanoidstandup_eps<EPS>_seed<SEED_ID>.log
 set -uo pipefail   # not -e: one failed run must not abort the sweep
 
-cd "$(dirname "$0")/.."   # brax/
-source sh/lib_runlog.sh
+cd "$(dirname "$0")/../../brax"   # every path below is relative to brax/
+source "$(dirname "$0")/../lib_runlog.sh"
 
 GPU=$1
 EPS=$2

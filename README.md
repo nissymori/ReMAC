@@ -11,16 +11,16 @@ pip install -r requirements.txt
 ## Repository layout
 
 ```
-brax/                    ReMAC, SAC, PPO, TD3 on Brax + the launch scripts (brax/sh/)
-analysis/                everything that turns runs into the figures and tables
-additional_experiments/  the diagnostics added during review (own README)
-data/                    the data the figures are drawn from
-toy/                     the fixed-state toy problem of Sec. 3
+brax/          ReMAC, SAC, PPO, TD3 on Brax, the environment configs, and the
+               main sweeps (brax/sh/)
+toy/           the fixed-state toy problem of Sec. 3
+experiments/   the sweeps for the tasks added or re-run since the first release,
+               and the appendix diagnostics (own README)
+analysis/      everything that turns runs into the figures and tables (own README)
+data/          the data the figures are drawn from
 ```
 
-`analysis/README.md` and `additional_experiments/README.md` cover their own
-directories. Every command below is run from the repository root unless it says
-otherwise.
+Every command below is run from the repository root unless it says otherwise.
 
 # Reproduce the results
 
@@ -61,8 +61,8 @@ value that does well across every M (App. C.1). At `brax/`:
 
 ```bash
 ./sh/tune/tune_remax.sh        # the six original tasks
-bash sh/reacher_tune.sh 0 "1:0.0001"          # Reacher, re-tuned after the fix below
-bash sh/pusher_tune.sh  0 "1:0.0001"          # Pusher
+bash experiments/sh/reacher_tune.sh 0 "1:0.0001"   # Reacher, re-tuned after the fix below
+bash experiments/sh/pusher_tune.sh  0 "1:0.0001"   # Pusher
 ```
 
 `python analysis/pick_reacher_lr.py` and `python analysis/pick_pusher_lr.py` apply the
@@ -79,14 +79,18 @@ At `brax/`:
 ./sh/ppo.sh     # PPO
 ./sh/td3.sh     # TD3
 
-# Reacher and Pusher have their own phase scripts (see the note below)
-bash sh/reacher_final.sh dense m4 0 3e-4
-bash sh/reacher_eps.sh   0 3e-4 "4:1e-2"
-PUSHER_LR=$(cat ../data/PUSHER_LR) bash sh/pusher_final.sh 0 "m1 m2 m4 m8 sac ppo"
-PUSHER_LR=$(cat ../data/PUSHER_LR) bash sh/pusher_eps.sh   0 "4:1e-2"
+```
 
-# HumanoidStandup's eps = 1e-2 arm, which the original sweep did not cover
-bash sh/humanoid_eps.sh 0 1e-2 "4:2"
+Reacher and Pusher have their own phase scripts, for the reason in the note below, and
+HumanoidStandup has the epsilon arm the original sweep did not cover.  These are run
+from the repository root:
+
+```bash
+bash experiments/sh/reacher_final.sh dense m4 0 3e-4
+bash experiments/sh/reacher_eps.sh   0 3e-4 "4:1e-2"
+bash experiments/sh/pusher_final.sh  0 "m1 m2 m4 m8 sac ppo"
+bash experiments/sh/pusher_eps.sh    0 "4:1e-2"
+bash experiments/sh/humanoid_eps.sh  0 1e-2 "4:2"
 ```
 
 Many short jobs spread over several GPUs are easiest to run through the queue: put one
@@ -94,31 +98,30 @@ command per line in a file and start one worker per GPU. One process per GPU -- 
 co-tenants on the same card are slower in total, not faster.
 
 ```bash
-for g in 0 1 2 3; do bash sh/queue_worker.sh $g logs/queue/jobs.txt & done
+for g in 0 1 2 3; do bash experiments/queue_worker.sh $g brax/logs/queue/jobs.txt & done
 ```
 
 #### A note on Reacher, and on Pusher
-`configs/brax/reacher.yaml` used to set `env_params.episode_length` for `sac:` and
+`brax/configs/brax/reacher.yaml` used to set `env_params.episode_length` for `sac:` and
 `ppo:` but not for `remax_ac:`, so ReMAC silently trained on Brax's default 1000-step
 episodes while the baselines used 50 -- a 20x longer episode, which made the return
 comparison on Reacher invalid. The config now sets it for every algorithm, and Reacher
-was re-tuned and re-run (`sh/reacher_{tune,final,eps}.sh`); those are the runs the paper
-reports. `configs/brax/pusher.yaml` had the same omission and was fixed the same way
-before Pusher was run at all.
+was re-tuned and re-run (`experiments/sh/reacher_{tune,final,eps}.sh`); those are the
+runs the paper reports. `brax/configs/brax/pusher.yaml` had the same omission and was
+fixed the same way before Pusher was run at all.
 
 ### Figures and tables
 
 ```bash
-bash brax/sh/plot.sh            # every Brax figure, into fig/
+bash analysis/plot.sh           # every Brax figure, into fig/
 python analysis/make_tables.py  # the LaTeX table bodies
 ```
 
 These read `data/`, so they work without wandb access. See `analysis/README.md`.
 
-### Additional experiments
-The diagnostics added during review -- the scale gradient, the SGD actor, visited-state
-coverage and the Adam-denominator ablation -- live in `additional_experiments/`, with
-their own README.
+### The appendix diagnostics
+The scale gradient, the SGD actor, visited-state coverage, the sparse-reward Reacher and
+the Adam-denominator ablation live in `experiments/`, with their own README.
 
 ## Related Work and Extensions
 - [Emergence of Exploration in Policy gradient reinforcement learning via Retrying](https://arxiv.org/abs/2606.00151) (ICML 2026)

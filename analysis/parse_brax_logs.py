@@ -9,7 +9,7 @@ The wandb API key on this machine is no longer accepted, so the camera-ready run
 into rows of exactly that schema.  The merged frame is a drop-in replacement for
 the pickle, so plot.py, make_cxt2_figs.py and make_tables.py keep working unchanged.
 
-Log format (written by brax/train.py plus brax/sh/lib_runlog.sh)
+Log format (written by brax/train.py plus experiments/lib_runlog.sh)
 ----------------------------------------------------------------
 One header line, then two interleaved metric line formats::
 

@@ -9,6 +9,10 @@
 # Usage:  bash sh/reacher_eps.sh <GPU_ID> <LR> "<M:EPS> <M:EPS> ..."
 set -euo pipefail
 
+# Run from anywhere: every path below is relative to brax/.
+cd "$(dirname "$0")/../../brax"
+
+
 GPU=$1
 LR=$2
 JOBS=$3

@@ -17,7 +17,7 @@ Toy problem (same as the paper): a ~ N(mu, sigma^2), r(a) = -a^2, RP gradient of
 ReMax objective with batch size B, retry budget M, started at (mu, sigma) = (-1.5, 1).
 
 Run from the repository root:
-    python additional_experiments/adam_denominator.py --save fig/adam_denominator.pdf
+    python experiments/adam_denominator.py --save fig/adam_denominator.pdf
 """
 
 import argparse

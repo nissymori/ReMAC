@@ -8,8 +8,7 @@ from the **repository root**.
 | file | what it is |
 |---|---|
 | `data/brax-remax-ac-report.pkl.gz` | The frame every Brax figure is drawn from: one row per (run, seed, step), long format. Read with `pandas.read_pickle`. |
-| `data/remac_rebuttal_data.pkl` | The additional experiments (SGD actor, state coverage); see `additional_experiments/README.md`. |
-| `data/PUSHER_LR` | The learning rate `analysis/pick_pusher_lr.py` selected for Pusher. |
+| `data/remac_rebuttal_data.pkl` | The additional experiments (SGD actor, state coverage); see `experiments/README.md`. |
 
 The first frame was originally fetched from wandb by `fetch_wandb_data_with_seeds()` in
 `plot.py`, which `plot.py` still calls when `--cache` points at a file that does not
@@ -22,6 +21,7 @@ n = 10.
 
 | script | produces |
 |---|---|
+| `plot.sh` | Regenerates every Brax figure from `data/` into `fig/`. |
 | `plot.py` | The main learning-curve figures. Subcommands: `2x4` (the eight main tasks), `2x3` (the original six), `lr-sweep`, `lr-sweep-grid`, `b-ablation`, `damping`. |
 | `make_cxt2_figs.py` | The per-epsilon M sweeps, Figs. 7-14. |
 | `make_humanoid_figs.py` | HumanoidStandup on its own, in the same visual language. |
@@ -33,7 +33,7 @@ n = 10.
 ## Reproducing the figures
 
 ```bash
-bash brax/sh/plot.sh          # every Brax figure, into fig/
+bash analysis/plot.sh         # every Brax figure, into fig/
 python analysis/make_tables.py
 ```
 
@@ -52,7 +52,7 @@ raised to $B = 16$ at the largest retry budget $M = 8$, where the estimator is n
 
 ## Adding a new run to the data
 
-New runs are logged to files (see `brax/sh/lib_runlog.sh`); fold them into the frame with
+New runs are logged to files (see `experiments/lib_runlog.sh`); fold them into the frame with
 
 ```bash
 python analysis/parse_brax_logs.py \

@@ -20,8 +20,8 @@
 #   -> logs/sgd/remac_sgd_m<M>_pusher_seed7.log                (sgd)
 set -uo pipefail   # not -e: one failed run must not abort the sweep
 
-cd "$(dirname "$0")/.."   # brax/
-source sh/lib_runlog.sh
+cd "$(dirname "$0")/../../brax"   # every path below is relative to brax/
+source "$(dirname "$0")/../lib_runlog.sh"
 
 GPU=$1
 JOBS=$2

@@ -3,7 +3,7 @@
 #
 # Both configs are identical except for the reward:
 #   configs/brax/reacher.yaml         r_t = -||fingertip - target|| - ||a||^2
-#   configs/brax/sparse_reacher.yaml  r_t = 1{ ||fingertip - target|| < 0.05 }
+#   ../experiments/configs/sparse_reacher.yaml  r_t = 1{ ||fingertip - target|| < 0.05 }
 # episode_length = 50 for every algorithm in both (the bug that made remax_ac
 # run 1000-step episodes on Reacher is fixed).
 #
@@ -13,6 +13,11 @@
 #   ENV      in {dense, sparse}
 #   ALGO_TAG in {sac, m1, m2, m4, m8}     (sac ignores LR: it keeps its own tuned lr)
 set -euo pipefail
+
+# Run from anywhere: every path below is relative to brax/.
+cd "$(dirname "$0")/../../brax"
+export PYTHONPATH="$(cd ../experiments && pwd)${PYTHONPATH:+:$PYTHONPATH}"
+
 
 ENV=$1
 TAG=$2
@@ -32,7 +37,7 @@ wandb_project="brax-remax-reacher-sparse"
 
 case "$ENV" in
   dense)  CFG=configs/brax/reacher.yaml ;;
-  sparse) CFG=configs/brax/sparse_reacher.yaml ;;
+  sparse) CFG=../experiments/configs/sparse_reacher.yaml ;;
   *) echo "unknown env: $ENV" >&2; exit 1 ;;
 esac
 

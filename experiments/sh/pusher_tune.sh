@@ -10,15 +10,15 @@
 # overridden here, as every swept value is.
 #
 # One (M, lr) cell per invocation, so the 20 cells can be spread over the GPUs by
-# sh/queue_worker.sh without two of them appending to the same log.
+# experiments/queue_worker.sh without two of them appending to the same log.
 #
 # Usage:  bash sh/pusher_tune.sh <GPU_ID> "<M:LR> <M:LR> ..."
 #   e.g.  bash sh/pusher_tune.sh 0 "1:0.0001 1:0.0002"
 #   -> logs/pusher/tune_m<M>_lr<LR>.log   (read by ref/pick_pusher_lr.py)
 set -uo pipefail   # not -e: one failed cell must not abort the sweep
 
-cd "$(dirname "$0")/.."   # brax/
-source sh/lib_runlog.sh
+cd "$(dirname "$0")/../../brax"   # every path below is relative to brax/
+source "$(dirname "$0")/../lib_runlog.sh"
 
 GPU=$1
 JOBS=$2
