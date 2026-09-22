@@ -100,15 +100,6 @@ than by eye. The selected values are in Tab. 2 and are what `lr_for` and each co
 
 The appendix diagnostics are the `diag_*` scripts; see `experiments/README.md`.
 
-#### A note on Reacher, and on Pusher
-`brax/configs/brax/reacher.yaml` used to set `env_params.episode_length` for `sac:` and
-`ppo:` but not for `remax_ac:`, so ReMAC silently trained on Brax's default 1000-step
-episodes while the baselines used 50 -- a 20x longer episode, which made the return
-comparison on Reacher invalid. The config now sets it for every algorithm, and Reacher
-was re-tuned and re-run (`experiments/sh/reacher_{tune,final,eps}.sh`); those are the
-runs the paper reports. `brax/configs/brax/pusher.yaml` had the same omission and was
-fixed the same way before Pusher was run at all.
-
 ### Figures and tables
 
 ```bash
