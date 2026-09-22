@@ -16,7 +16,7 @@ fig/entropy_humanoidstandup_vary_eps.pdf     entropy, one panel per eps (matches
 fig/return_humanoidstandup_vary_eps.pdf      return,  one panel per eps (matches Figs. 11-14)
 
 Note: HumanoidStandup was originally run at eps in {1e-8, 1e-1, 1} only.  The missing
-eps=1e-2 arm was added for the camera-ready version (experiments/sh/humanoid_eps.sh), so the
+eps=1e-2 arm was added for the camera-ready version (experiments/sh/eps.sh), so the
 sweep now covers all four values, as it does for every other task.
 
 Run:  python analysis/make_humanoid_figs.py

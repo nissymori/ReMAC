@@ -9,29 +9,44 @@ notion of exploration than policy stochasticity.
 
 Every script `cd`s into `brax/` itself, so it can be run from anywhere.
 
+| script | what it is |
+|---|---|
+| `sh/tune.sh <ENV> <GPU> "<M:LR> ..."` | the learning-rate sweep of App. C.1 |
+| `sh/final.sh <ENV> <GPU> "<TAG> ..."` | the reported runs at eps = 1e-8 |
+| `sh/eps.sh <ENV> <GPU> "<M:EPS> ..."` | the epsilon sweep |
+| `sh/make_queue.sh <PHASE>` | writes out the full matrix for a phase |
+| `sh/diag_*.sh` | the appendix diagnostics, below |
+| `lib_runlog.sh` | what differs per task: `lr_for`, `b_for_m`, `seeds_for` |
+| `queue_worker.sh` | one worker per GPU against a shared queue file |
+
+The three phases take the task as an argument rather than existing once per task: the
+procedure is the same everywhere, and the three numbers that are not -- the tuned
+learning rate, the action-sample batch size, and how the ten seeds are split across
+processes -- are looked up in `lib_runlog.sh`.
+
 Everything here is run from the **repository root**.
 
 | script | what it answers | where it lands in the paper |
 |---|---|---|
 | `experiments/adam_denominator.py` | Does Adam's *denominator* cause the effect, as opposed to its momentum or bias correction? Re-runs the toy problem with an EMA-only optimizer, i.e. Adam with the denominator deleted. | Tab. 1, Fig. 6 |
-| `experiments/sh/remac_sigma_m8.sh` | Does the policy scale really increase with $M$ during training? Logs the scale gradient and the scale itself, with $B=16$ at every $M$. | Tab. 7 |
-| `experiments/sh/remac_sgd.sh` | Does ReMAC depend on Adam? Re-runs it with a plain-SGD actor, everything else held fixed. | Tab. 8 |
-| `experiments/sh/remac_state_coverage.sh` | Does ReMAC visit more of the state space than SAC, not just act more stochastically? | Tab. 9 |
+| `experiments/sh/diag_scale_gradient.sh` | Does the policy scale really increase with $M$ during training? Logs the scale gradient and the scale itself, with $B=16$ at every $M$. | Tab. 7 |
+| `experiments/sh/diag_sgd_actor.sh` | Does ReMAC depend on Adam? Re-runs it with a plain-SGD actor, everything else held fixed. | Tab. 8 |
+| `experiments/sh/diag_state_coverage.sh` | Does ReMAC visit more of the state space than SAC, not just act more stochastically? | Tab. 9 |
 | `experiments/knn_state_entropy.py` | The $k$-nearest-neighbour estimator of the visited-state entropy used by the coverage experiment. | Tab. 9 |
 
 ## Running them
 
 ```bash
 # The scale-gradient sweep (Tab. 7): one GPU per job list.
-bash experiments/sh/remac_sigma_m8.sh --gpu 0 --jobs "walker2d:1 walker2d:2"
+bash experiments/sh/diag_scale_gradient.sh --gpu 0 --jobs "walker2d:1 walker2d:2"
 
 # The SGD-actor arm (Tab. 8).  Its Adam control is the ReMAC arm of the coverage
 # project below -- same env, lr, M, B, seeds and step budget, differing only in the
 # actor optimizer -- so do not re-run Adam here.
-bash experiments/sh/remac_sgd.sh --gpu 0 --m 4
+bash experiments/sh/diag_sgd_actor.sh --gpu 0 --m 4
 
 # Visited-state coverage (Tab. 9).
-bash experiments/sh/remac_state_coverage.sh --gpu 0 --m 4
+bash experiments/sh/diag_state_coverage.sh --gpu 0 --m 4
 ```
 
 `remac_sigma_m8.sh` writes one log per process under `brax/logs/sigma_m8/runs/` and its
