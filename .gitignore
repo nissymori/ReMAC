@@ -176,7 +176,12 @@ cython_debug/
 .pypirc
 
 videos/
-fig/
 cache/
 docs/
-plot.py
+
+# fig/ holds generated figures; bash analysis/plot.sh rebuilds all of them from data/.
+fig/
+
+# NOTE: a bare `plot.py` rule used to live here, which silently excluded the plotting
+# library that the README and analysis/plot.sh tell you to run -- so the figures could not
+# be reproduced from a clone.  The plotting code now lives in analysis/ and is published.
