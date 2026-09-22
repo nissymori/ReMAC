@@ -3,10 +3,8 @@
 Every figure and table in the paper is drawn from
 ``data/brax-remax-ac-report.pkl.gz``, a long-format pandas frame that
 ``fetch_wandb_data_with_seeds()`` (in analysis/plot.py) originally built from wandb.
-The wandb API key on this machine is no longer accepted, so the camera-ready runs
-(Pusher, and HumanoidStandup's missing eps = 1e-2 arm) are launched with
-``python -u`` into per-run log files instead, and this module converts those logs
-into rows of exactly that schema.  The merged frame is a drop-in replacement for
+Some runs are launched with ``python -u`` into per-run log files rather than to wandb,
+and this module converts those logs into rows of exactly that schema.  The merged frame is a drop-in replacement for
 the pickle, so plot.py, make_eps_sweeps.py and make_tables.py keep working unchanged.
 
 Log format (written by brax/train.py plus experiments/lib_runlog.sh)
@@ -42,7 +40,7 @@ Usage
     python analysis/parse_brax_logs.py --dry-run --logs 'brax/logs/pusher/final_*.log'
     python analysis/parse_brax_logs.py \\
         --base data/brax-remax-ac-report.pkl.gz \\
-        --out  data/brax-remax-ac-camera-ready.pkl.gz \\
+        --out  data/brax-remax-ac-merged.pkl.gz \\
         --logs 'brax/logs/pusher/final_*.log' \\
                'brax/logs/pusher/eps_*.log' \\
                'brax/logs/humanoid_eps/*.log'
@@ -291,7 +289,7 @@ def merge_into(base_pkl, paths, out_pkl, *, require_complete=False, min_seeds=No
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--base", default="data/brax-remax-ac-report.pkl.gz")
-    ap.add_argument("--out", default="data/brax-remax-ac-camera-ready.pkl.gz")
+    ap.add_argument("--out", default="data/brax-remax-ac-merged.pkl.gz")
     ap.add_argument("--logs", nargs="+", required=True,
                     help="glob(s) of run logs, e.g. 'brax/logs/pusher/*.log'")
     ap.add_argument("--require-complete", action="store_true",

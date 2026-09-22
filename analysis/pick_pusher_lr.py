@@ -1,6 +1,6 @@
 """Pick ReMAC's learning rate on Pusher, the eighth main task.
 
-Reads the tuning logs written by experiments/sh/pusher_tune.sh and applies the paper's
+Reads the tuning logs written by experiments/sh/tune.sh and applies the paper's
 protocol (App. C.1): sweep lr in {1e-4, 2e-4, 3e-4, 5e-4, 1e-3} with 3 seeds and
 "select a value that performed consistently well across environments and M".
 Here there is a single environment, so the selection is across M, exactly as in

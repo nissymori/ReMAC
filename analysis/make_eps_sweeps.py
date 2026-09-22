@@ -49,8 +49,7 @@ EPS_TAG = {1e-8: "1em8", 1e-2: "1em2", 1e-1: "1em1", 1.0: "1"}
 # M -> (linestyle, marker): redundant channels on top of the paper's M -> hue assignment.
 M_LINE = {1: ("-", "o"), 2: ("--", "s"), 4: ("-.", "^"), 8: (":", "D")}
 
-# The camera-ready eight main tasks: the paper's original six, then humanoidstandup and
-# pusher appended, so the first six keep their panel positions.
+# The eight main tasks, in the order the figures show them.
 ENV_ORDER = ["ant", "halfcheetah", "hopper", "walker2d", "reacher", "swimmer",
              "humanoidstandup", "pusher"]
 NROWS, NCOLS = 2, 4

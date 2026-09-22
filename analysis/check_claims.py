@@ -1,15 +1,15 @@
 """Re-check, against the data, every quantitative claim the text makes over the task set.
 
-Adding Pusher takes the main evaluation from six tasks to eight, so sentences of the
-form "in all six tasks" are claims about a set that has changed.  This script evaluates
-each of them and prints PASS or FAIL with the numbers behind it, so the wording is
-corrected from the data rather than from memory.
+Sentences of the form "in all six tasks" are claims about a particular set of tasks, so
+they have to be rechecked whenever that set changes.  This script evaluates each of them
+and prints PASS or FAIL with the numbers behind it, so the wording follows the data
+rather than memory.
 
 Conventions are the paper's (App. C.1): a seed is (run_id, seed_id), the *final* value
 of a run is the mean over the last 10% of training, and n = 10 per configuration.
 
     python analysis/check_claims.py
-    REMAC_DATA=data/brax-remax-ac-camera-ready.pkl.gz python analysis/check_claims.py
+    REMAC_DATA=data/brax-remax-ac-merged.pkl.gz python analysis/check_claims.py
 """
 
 import os
@@ -232,7 +232,7 @@ def claim_humanoid_vs_sac(d):
 
 
 def claim_pusher_present(d):
-    """The camera-ready addition itself: Pusher must be complete at n = 10."""
+    """Pusher must be complete at n = 10 on every arm of Figs. 3 and 4."""
     detail, missing = [], []
     for m in MS:
         r = remac(d, "pusher", m)

@@ -1,6 +1,6 @@
 """Pick ReMAC's learning rate on the fixed Reacher (episode_length = 50).
 
-Reads the tuning logs written by sh/reacher_tune.sh and applies the paper's
+Reads the tuning logs written by experiments/sh/tune.sh and applies the paper's
 protocol (App. C.1): sweep lr in {1e-4, 2e-4, 3e-4, 5e-4, 1e-3} with 3 seeds and
 "select a value that performed consistently well across environments and M".
 Here there is a single environment, so the selection is across M: we rank the
@@ -67,7 +67,7 @@ def main():
     best = max(table, key=lambda lr: (table[lr][0], table[lr][1]))
     print(f"\nselected lr = {best}  (best worst-case over M: {table[best][0]:.2f}, "
           f"mean over M: {table[best][1]:.2f})")
-    print(f"\nnext:  bash sh/reacher_final.sh <dense|sparse> <sac|m1|m2|m4|m8> <gpu> {best}")
+    print(f"\nnext:  bash experiments/sh/final.sh <dense|sparse> <sac|m1|m2|m4|m8> <gpu> {best}")
 
 
 if __name__ == "__main__":
